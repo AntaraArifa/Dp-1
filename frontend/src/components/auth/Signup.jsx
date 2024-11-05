@@ -8,6 +8,8 @@ import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { USER_API_END_POINT } from "@/utils/constant";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "@/redux/authSlice";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -20,7 +22,8 @@ const Signup = () => {
   });
 
   const navigate = useNavigate();
-
+  const { loading } = useSelector(store => store.auth)
+  const dispatch = useDispatch();
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
@@ -45,7 +48,7 @@ const Signup = () => {
     console.log("API Endpoint:", `${USER_API_END_POINT}/register`);
 
     try {
-      console.log("Sending request to:", `${USER_API_END_POINT}/register`);
+      dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
         withCredentials: true,
       });
@@ -57,6 +60,8 @@ const Signup = () => {
     } catch (error) {
       console.error(error);
       toast.error("Registration failed. Please try again.");
+    }finally{
+      dispatch(setLoading(false))
     }
   };
 
@@ -120,8 +125,8 @@ const Signup = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="student"
-                  checked={input.role === "student"}
+                  value="Job Seeker"
+                  checked={input.role === "Job Seeker"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                   id="r1"
@@ -158,9 +163,11 @@ const Signup = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full my-4">
+          {
+            loading ? <Button className='w-full my-4'><Loader2 className='mr-2 h-4 animate-spin' />Please wait</Button>:<Button type="submit" className="w-full my-4">
             Signup
           </Button>
+          }
           <span className="block text-center">
             Already have an account?{" "}
             <Link to="/login" className="text-blue-600">

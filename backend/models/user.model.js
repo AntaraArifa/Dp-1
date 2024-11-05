@@ -1,43 +1,5 @@
 import mongoose from "mongoose";
 
-<<<<<<< HEAD
-const userSchema = new mongoose.Schema({
-    fullname: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    phoneNumber: {
-        type: Number,
-        required: true
-    },
-    password:{
-        type:String,
-        required:true,
-    },
-    role:{
-        type:String,
-        enum:['Job Seeker','Employer'],
-        required:true
-    },
-    profile:{
-        bio:{type:String},
-        skills:[{type:String}],
-        resume:{type:String}, // URL to resume file
-        resumeOriginalName:{type:String},
-        company:{type:mongoose.Schema.Types.ObjectId, ref:'Company'}, 
-        profilePhoto:{
-            type:String,
-            default:""
-        }
-    },
-},{timestamps:true});
-export const User = mongoose.model('User', userSchema);
-=======
 const userSchema = new mongoose.Schema(
   {
     fullname: {
@@ -77,4 +39,3 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 export const User = mongoose.model("User", userSchema);
->>>>>>> efb4e6f (Niaz 2nd commit)
