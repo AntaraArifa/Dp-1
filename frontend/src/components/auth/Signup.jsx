@@ -133,21 +133,21 @@ const Signup = () => {
                   id="r1"
                 />
                 <Label htmlFor="r1" className="cursor-pointer">
-                  Student
+                  Job Seeker
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Input
                   type="radio"
                   name="role"
-                  value="recruiter"
-                  checked={input.role === "recruiter"}
+                  value="Employer"
+                  checked={input.role === "Employer"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                   id="r2"
                 />
                 <Label htmlFor="r2" className="cursor-pointer">
-                  Recruiter
+                  Employer
                 </Label>
               </div>
             </div>
