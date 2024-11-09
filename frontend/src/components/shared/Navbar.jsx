@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { setUser } from "@/redux/authSlice";
 
 const Navbar = () => {
-  const { user } = useSelector(store => store.auth);
+  const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const logoutHandler = async () => {
     try {
-      const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true })
+      const res = await axios.get(`${USER_API_END_POINT}/logout`, {
+        withCredentials: true,
+      });
       if (res.data.success) {
         dispatch(setUser(null));
         navigate("/");
@@ -24,9 +26,9 @@ const Navbar = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message)
+      toast.error(error.response.data.message);
     }
-  }
+  };
   return (
     <div className="bg-white shadow-md w-full">
       <div className="flex items-center justify-between px-4 h-16 max-w-full">
@@ -39,11 +41,28 @@ const Navbar = () => {
 
         {/* Right side - Navigation links */}
         <div className="flex items-center gap-8">
-          <ul className="flex font-medium items-center gap-8">
-            <li className="hover:text-[#F83002] cursor-pointer"><Link to="/">Home</Link></li>
-            <li className="hover:text-[#F83002] cursor-pointer"><Link to="/jobs">Jobs</Link></li>
-            <li className="hover:text-[#F83002] cursor-pointer"><Link to="/browse">Browse</Link></li>
-          </ul>
+          {user && user.role === "Employer" ? (
+            <ul className="no-bullets">
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/admin/companies">Companies</Link>
+              </li>
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/admin/jobs">Jobs</Link>
+              </li>
+            </ul>
+          ) : (
+            <ul className="no-bullets">
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/">Home</Link>
+              </li>
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/jobs">Jobs</Link>
+              </li>
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/browse">Browse</Link>
+              </li>
+            </ul>
+          )}
 
           {user ? (
             <Popover>
@@ -67,19 +86,25 @@ const Navbar = () => {
                   </Avatar>
                   <div>
                     <h4 className="font-medium">{user?.fullname}</h4>
-                    <p className="text-sm text-gray-500">{user?.profile?.bio}</p>
+                    <p className="text-sm text-gray-500">
+                      {user?.profile?.bio}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col text-gray-600 mt-4">
-                  <div className="flex w-fit items-center gap-2 cursor-pointer mt-2">
-                    <button className="text-gray-600 hover:text-blue-600">
-                      <Link to="/profile">View Profile</Link>
+                  {user && user.role === "Job Seeker" && (
+                    <div className="flex w-fit items-center gap-2 cursor-pointer mt-2">
+                      <button className="text-gray-600 hover:text-blue-600">
+                        <Link to="/profile">View Profile</Link>
+                      </button>
+                    </div>
+                  )}
 
-                    </button>
-                  </div>
                   <div className="flex w-fit items-center gap-2 cursor-pointer mt-2">
                     <LogOut />
-                    <Button onClick={logoutHandler} variant="link">Logout</Button>
+                    <Button onClick={logoutHandler} variant="link">
+                      Logout
+                    </Button>
                   </div>
                 </div>
               </PopoverContent>

@@ -43,7 +43,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Registration failed. Please try again.");
+      toast.error("Login failed. Please fill out all the information and try again.");
     } finally {
       dispatch(setLoading(false));
     }
@@ -65,7 +65,7 @@ const Login = () => {
               name="email"
               value={input.email}
               onChange={changeEventHandler}
-              placeholder="patel@gmail.com"
+              placeholder="Your Email"
             />
           </div>
 
@@ -100,14 +100,14 @@ const Login = () => {
                 <Input
                   type="radio"
                   name="role"
-                  value="recruiter"
-                  checked={input.role === "recruiter"}
+                  value="Employer"
+                  checked={input.role === "Employer"}
                   onChange={changeEventHandler}
                   className="cursor-pointer"
                   id="r2"
                 />
                 <Label htmlFor="r2" className="cursor-pointer">
-                  Recruiter
+                  Employer
                 </Label>
               </div>
             </div>

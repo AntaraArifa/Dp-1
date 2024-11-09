@@ -1,4 +1,6 @@
 import { Company } from "../models/company.model.js";
+import getDataUri from "../utils/datauri.js";
+import cloudinary from "../utils/cloudinary.js";
 
 const registerCompany = async (req, res) => {
     try {
@@ -74,7 +76,11 @@ const updateCompany = async (req, res) => {
         const { name, description, website, location } = req.body;
         const file = req.file; 
 
-        const updateData = { name, description, website, location };
+        const fileUri = getDataUri(file)
+        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+        const logo = cloudResponse.secure_url;
+
+        const updateData = { name, description, website, location, logo };
 
         // Remove undefined properties from updateData
         Object.keys(updateData).forEach((key) => updateData[key] === undefined && delete updateData[key]);
