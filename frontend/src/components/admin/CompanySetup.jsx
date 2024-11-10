@@ -14,6 +14,8 @@ import useGetCompanyById from '@/hooks/useGetCompanyById'
 const CompanySetup = () => {
     const params = useParams();
     useGetCompanyById(params.id);
+    
+    useGetCompanyById(params.id);
     const [input, setInput] = useState({
         name: "",
         description: "",
@@ -26,12 +28,12 @@ const CompanySetup = () => {
     const navigate = useNavigate();
 
     const changeEventHandler = (e) => {
-        setInput({ ...input, [e.target.name]: e.target.value });
+        setInput({...input, [e.target.name]: e.target.value });
     }
 
     const changeFileHandler = (e) => {
         const file = e.target.files?.[0];
-        setInput({ ...input, file });
+        setInput({...input, file });
     }
 
     const submitHandler = async (e) => {
