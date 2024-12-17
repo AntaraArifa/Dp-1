@@ -34,3 +34,9 @@ body {
   display: flex;
   gap: 1rem;
 }
+.messages {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}

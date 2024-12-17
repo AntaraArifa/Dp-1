@@ -14,8 +14,9 @@ import CompanySetup from './components/admin/CompanySetup'
 import AdminJobs from "./components/admin/AdminJobs";
 import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
-//import PostJob from './components/admin/PostJob'
-//import Applicants from './components/admin/Applicants'
+//import Chatpage from "./components/Chatpage";
+//import ChatProvider from "./components/chatContext/ChatProvider";
+
 
 const appRouter = createBrowserRouter([
 
@@ -48,7 +49,7 @@ const appRouter = createBrowserRouter([
     path:"/description/:id",
     element:<JobDescription/>
   },
-
+  
   //For Admin
 
   {
