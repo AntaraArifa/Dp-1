@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { LogOut, User2 } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { USER_API_END_POINT } from "@/utils/constant";
 import axios from "axios";
@@ -14,6 +14,7 @@ const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const logoutHandler = async () => {
     try {
       const res = await axios.get(`${USER_API_END_POINT}/logout`, {
@@ -29,6 +30,7 @@ const Navbar = () => {
       toast.error(error.response.data.message);
     }
   };
+
   return (
     <div className="bg-white shadow-md w-full">
       <div className="flex items-center justify-between px-4 h-16 max-w-full">
@@ -51,7 +53,7 @@ const Navbar = () => {
               </li>
             </ul>
           ) : (
-            <ul className="no-bullets">
+            <ul className="no-bullets flex gap-8">
               <li className="hover:text-[#F83002] cursor-pointer">
                 <Link to="/">Home</Link>
               </li>
@@ -63,6 +65,9 @@ const Navbar = () => {
               </li>
               <li className="hover:text-[#F83002] cursor-pointer">
                 <Link to="/chat">Chat</Link>
+              </li>
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/resume/edit">Resume</Link>
               </li>
             </ul>
           )}
