@@ -14,7 +14,8 @@ import {
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import applicationSlice from "./applicationSlice";
-
+import chatSlice from "./chatSlice";
+import messageSlice from "./messageSlice"
 const persistConfig = {
     key: 'root',
     version: 1,
@@ -24,7 +25,9 @@ const rootReducer=combineReducers({
     auth:authSlice,
     job:jobSlice,
     company:companySlice,
-    application:applicationSlice
+    application:applicationSlice,
+    chat:chatSlice,
+    message:messageSlice
 })
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 

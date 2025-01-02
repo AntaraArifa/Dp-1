@@ -8,7 +8,7 @@ import companyRoute from "./routes/company.route.js"
 import jobRoute from "./routes/job.route.js"
 import applicationRoute from "./routes/application.route.js";
 import chatRoute from "./routes/chat.route.js"
-import messageRoute from "./routes/message.route.js"
+
 
 dotenv.config({});
 
@@ -36,7 +36,6 @@ app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/chat",chatRoute);
-app.use("/api/v1/message",messageRoute)
 
 app.listen(PORT,()=>{
     connectDB();

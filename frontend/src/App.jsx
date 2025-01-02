@@ -16,6 +16,7 @@ import Applicants from "./components/admin/Applicants";
 import ResumeEditor from "./components/ResumeEditor";
 import TemplateSelector from "./components/TemplateSelector";
 import Preview from "./components/Preview";
+import ChatPage from "./components/ChatPage";
 
 const appRouter = createBrowserRouter([
   // For Job Seeker
@@ -46,6 +47,10 @@ const appRouter = createBrowserRouter([
   {
     path: "/description/:id",
     element: <JobDescription />,
+  },
+  {
+    path:"/chat",
+    element:<ChatPage/>
   },
 
   // For Admin
