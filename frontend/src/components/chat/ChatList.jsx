@@ -11,8 +11,9 @@ const ChatList = ({ onChatSelect }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState(null);
   const [selectedChatId, setSelectedChatId] = useState(null);
-  const [isGroupChatDialogOpen, setIsGroupChatDialogOpen] = useState(false); 
-  const loggedInUserId = useSelector((store) => store.auth.user);
+  const [isGroupChatDialogOpen, setIsGroupChatDialogOpen] = useState(false);
+  
+  const loggedInUserId = useSelector((store) => store.auth.user?._id); // Ensure `user` has `_id`
   const dispatch = useDispatch();
 
   useGetAllUserChats();
@@ -46,8 +47,9 @@ const ChatList = ({ onChatSelect }) => {
   };
 
   const handleChatSelect = (chat) => {
+    if (!chat) return; // Guard against undefined chat
     dispatch(setSelectedChat(chat));
-    onChatSelect(chat);
+    if (onChatSelect) onChatSelect(chat);
   };
 
   const chatsToDisplay = searchedChats || allChats;
@@ -69,9 +71,7 @@ const ChatList = ({ onChatSelect }) => {
   };
 
   const handleNewGroupChat = (newChat) => {
-    setSearchedChats((prev) => ({
-      chats: prev?.chats ? [newChat, ...prev.chats] : [newChat],
-    }));
+    setSearchedChats((prev) => (prev?.chats ? [newChat, ...prev.chats] : [newChat]));
     setIsGroupChatDialogOpen(false);
   };
 
@@ -113,54 +113,60 @@ const ChatList = ({ onChatSelect }) => {
       )}
 
       <ul>
-        {chatsToDisplay?.chats.map((chat) => {
-          const recipient = chat.isGroupChat
-            ? null
-            : chat.users.find((user) => user._id !== loggedInUserId);
+        {Array.isArray(chatsToDisplay?.chats) && chatsToDisplay.chats.length > 0 ? (
+          chatsToDisplay.chats.map((chat) => {
+            const recipient = chat.isGroupChat
+              ? null
+              : chat.users.find((user) => user._id !== loggedInUserId);
 
-          const chatName = chat.isGroupChat
-            ? chat.chatName
-            : recipient?.fullname || recipient?.email || "Unknown Chat";
+            const chatName = chat.isGroupChat
+              ? chat.chatName
+              : recipient?.fullname || recipient?.email || "Unknown Chat";
 
-          return (
-            <li
-              key={chat._id}
-              className="flex items-center p-4 cursor-pointer hover:bg-gray-100"
-              onClick={() => handleChatSelect(chat)}
-            >
-              <img
-                src={
-                  chat.isGroupChat
-                    ? "/group-avatar.png"
-                    : recipient?.profile?.profilePhoto || "/default-avatar.png"
-                }
-                alt="Chat Avatar"
-                className="w-10 h-10 rounded-full mr-4"
-              />
-              <div className="flex-1">
-                <p className="font-bold">{chatName}</p>
-                <p className="text-gray-500 text-sm truncate">
-                  {chat.latestMessage
-                    ? `${chat.latestMessage.sender.fullname || "Unknown"}: ${
-                        chat.latestMessage.content || "No content"
-                      }`
-                    : "No messages yet"}
-                </p>
-              </div>
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openAddMembersDialog(chat._id);
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ⋮
-                </button>
-              </div>
-            </li>
-          );
-        })}
+            return (
+              <li
+                key={chat._id}
+                className="flex items-center p-4 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleChatSelect(chat)}
+              >
+                <img
+                  src={
+                    chat.isGroupChat
+                      ? "/group-avatar.png"
+                      : recipient?.profile?.profilePhoto || "/default-avatar.png"
+                  }
+                  alt="Chat Avatar"
+                  className="w-10 h-10 rounded-full mr-4"
+                />
+                <div className="flex-1">
+                  <p className="font-bold">{chatName}</p>
+                  <p className="text-gray-500 text-sm truncate">
+                    {chat.latestMessage
+                      ? `${chat.latestMessage.sender.fullname || "Unknown"}: ${
+                          chat.latestMessage.content || "No content"
+                        }`
+                      : "No messages yet"}
+                  </p>
+                </div>
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAddMembersDialog(chat._id);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ⋮
+                  </button>
+                </div>
+              </li>
+            );
+          })
+        ) : (
+          <div className="p-4 text-center text-gray-500">
+            No chats available. Create a new chat or group.
+          </div>
+        )}
       </ul>
 
       {dialogType === "addMembers" && selectedChatId && (
