@@ -14,34 +14,50 @@ const ResumeEditor = () => {
     skills: [""],
   });
 
+  // Handle input changes
   const handleChange = (e, section, index = null, field = null) => {
-    if (index !== null && field !== null) {
+    if (section === "skills" && index !== null) {
+      // Special handling for skills (array of strings)
+      const updatedSkills = [...formData.skills];
+      updatedSkills[index] = e.target.value;
+      setFormData({ ...formData, skills: updatedSkills });
+    } else if (index !== null && field !== null) {
+      // Handling for education and experience
       const updatedSection = [...formData[section]];
       updatedSection[index][field] = e.target.value;
       setFormData({ ...formData, [section]: updatedSection });
     } else {
+      // Handling for single values (e.g., name, email, etc.)
       setFormData({ ...formData, [section]: e.target.value });
     }
   };
 
+  // Add a new section item
   const addSectionItem = (section) => {
     const newItem =
       section === "education"
         ? { degree: "", institution: "", year: "" }
         : section === "experience"
         ? { jobTitle: "", company: "", duration: "", description: "" }
-        : "";
+        : section === "skills"
+        ? ""
+        : null;
+
     setFormData({ ...formData, [section]: [...formData[section], newItem] });
   };
 
+  // Remove a section item
   const removeSectionItem = (section, index) => {
     const updatedSection = formData[section].filter((_, i) => i !== index);
     setFormData({ ...formData, [section]: updatedSection });
   };
 
+  // Handle form submission
   const handleSubmit = () => {
     console.log("Resume Data:", formData);
     alert("Resume saved successfully!");
+    // Navigate to the template selection page
+    navigate("/resume/templates", { state: { formData } });
   };
 
   return (
@@ -54,8 +70,9 @@ const ResumeEditor = () => {
           Back to Home
         </button>
 
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">Resume Editor</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-8">Resume Builder</h2>
 
+        {/* Personal Details Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div>
             <label className="block text-gray-700 font-medium mb-2">Name</label>
@@ -99,6 +116,7 @@ const ResumeEditor = () => {
           </div>
         </div>
 
+        {/* Education Section */}
         <div className="section mb-6">
           <h3 className="text-xl font-semibold mb-4">Education</h3>
           {formData.education.map((edu, index) => (
@@ -142,6 +160,7 @@ const ResumeEditor = () => {
           </button>
         </div>
 
+        {/* Experience Section */}
         <div className="section mb-6">
           <h3 className="text-xl font-semibold mb-4">Experience</h3>
           {formData.experience.map((exp, index) => (
@@ -191,6 +210,7 @@ const ResumeEditor = () => {
           </button>
         </div>
 
+        {/* Skills Section */}
         <div className="section mb-6">
           <h3 className="text-xl font-semibold mb-4">Skills</h3>
           {formData.skills.map((skill, index) => (
@@ -218,11 +238,12 @@ const ResumeEditor = () => {
           </button>
         </div>
 
+        {/* Submit Button */}
         <button
           className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition duration-300 w-full py-3 text-lg"
           onClick={handleSubmit}
         >
-          Save Resume
+          Create Resume
         </button>
       </div>
     </div>
