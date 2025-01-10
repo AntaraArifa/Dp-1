@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ResumeEditor = () => {
   const navigate = useNavigate();
@@ -14,25 +15,20 @@ const ResumeEditor = () => {
     skills: [""],
   });
 
-  // Handle input changes
   const handleChange = (e, section, index = null, field = null) => {
     if (section === "skills" && index !== null) {
-      // Special handling for skills (array of strings)
       const updatedSkills = [...formData.skills];
       updatedSkills[index] = e.target.value;
       setFormData({ ...formData, skills: updatedSkills });
     } else if (index !== null && field !== null) {
-      // Handling for education and experience
       const updatedSection = [...formData[section]];
       updatedSection[index][field] = e.target.value;
       setFormData({ ...formData, [section]: updatedSection });
     } else {
-      // Handling for single values (e.g., name, email, etc.)
       setFormData({ ...formData, [section]: e.target.value });
     }
   };
 
-  // Add a new section item
   const addSectionItem = (section) => {
     const newItem =
       section === "education"
@@ -42,34 +38,30 @@ const ResumeEditor = () => {
         : section === "skills"
         ? ""
         : null;
-
     setFormData({ ...formData, [section]: [...formData[section], newItem] });
   };
 
-  // Remove a section item
   const removeSectionItem = (section, index) => {
     const updatedSection = formData[section].filter((_, i) => i !== index);
     setFormData({ ...formData, [section]: updatedSection });
   };
 
-  // Handle form submission
-  const handleSubmit = () => {
-    console.log("Resume Data:", formData);
-    alert("Resume saved successfully!");
-    // Navigate to the template selection page
-    navigate("/resume/templates", { state: { formData } });
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post("http://localhost:8000/api/v1/resumes", formData); // Update the URL here
+      const { resume } = response.data;
+  
+      // Navigate to TemplateSelector with resumeId in state
+      navigate(`/resume/templates`, { state: { resumeId: resume._id } });
+    } catch (error) {
+      console.error("Failed to save resume:", error);
+      alert("Failed to save resume. Please try again.");
+    }
   };
 
   return (
     <div className="resume-editor bg-gray-100 min-h-screen p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <button
-          className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition duration-300 mb-4"
-          onClick={() => navigate("/")}
-        >
-          Back to Home
-        </button>
-
         <h2 className="text-3xl font-bold text-gray-800 mb-8">Resume Builder</h2>
 
         {/* Personal Details Section */}
@@ -117,7 +109,7 @@ const ResumeEditor = () => {
         </div>
 
         {/* Education Section */}
-        <div className="section mb-6">
+        <div className="mb-6">
           <h3 className="text-xl font-semibold mb-4">Education</h3>
           {formData.education.map((edu, index) => (
             <div key={index} className="mb-4">
@@ -161,7 +153,7 @@ const ResumeEditor = () => {
         </div>
 
         {/* Experience Section */}
-        <div className="section mb-6">
+        <div className="mb-6">
           <h3 className="text-xl font-semibold mb-4">Experience</h3>
           {formData.experience.map((exp, index) => (
             <div key={index} className="mb-4">
@@ -211,7 +203,7 @@ const ResumeEditor = () => {
         </div>
 
         {/* Skills Section */}
-        <div className="section mb-6">
+        <div className="mb-6">
           <h3 className="text-xl font-semibold mb-4">Skills</h3>
           {formData.skills.map((skill, index) => (
             <div key={index} className="mb-4">

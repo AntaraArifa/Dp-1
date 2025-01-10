@@ -49,6 +49,9 @@ const appRouter = createBrowserRouter([
   { path: "/resume/templates", element: <TemplateSelector /> },
   { path: "/resume/templates/:id", element: <TemplatePreview /> }, // Dynamic route for previewing a specific template
   { path: "/resume/preview", element: <Preview /> },
+
+  // Fallback Route for 404
+  { path: "*", element: <h1 className='text-center text-red-600'>404 - Page Not Found</h1> },
 ]);
 
 function App() {

@@ -1,24 +1,29 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Import images
+import modernTemplate from "../assets/templates/modern.png";
+import classicTemplate from "../assets/templates/classic.png";
+import creativeTemplate from "../assets/templates/creative.png";
+
 const templates = [
   {
     id: 1,
     name: "Modern Template",
     description: "A sleek and modern design suitable for most industries.",
-    previewImage: "/assets/templates/modern.png",
+    previewImage: modernTemplate,
   },
   {
     id: 2,
     name: "Classic Template",
     description: "A traditional layout perfect for formal job applications.",
-    previewImage: "/assets/templates/classic.png",
+    previewImage: classicTemplate,
   },
   {
     id: 3,
     name: "Creative Template",
     description: "An artistic layout for creative roles and portfolios.",
-    previewImage: "/assets/templates/creative.png",
+    previewImage: creativeTemplate,
   },
 ];
 
@@ -31,23 +36,23 @@ const TemplateSelector = () => {
     setSelectedTemplate(templateId);
   };
 
-  // Handle navigation to preview page
+  // Navigate to preview page for a specific template
   const handlePreviewTemplate = (templateId) => {
     navigate(`/template-preview/${templateId}`);
   };
 
   // Confirm template selection and navigate to the resume generation page
-  const handleContinue = () => {
-    if (selectedTemplate) {
-      navigate(`/generate-resume/${selectedTemplate}`);
-    } else {
-      alert("Please select a template to continue.");
-    }
-  };
+const handleContinue = () => {
+  if (selectedTemplate) {
+    navigate(`/resume/templates/${selectedTemplate}`);
+  } else {
+    alert("Please select a template to continue.");
+  }
+};
 
   return (
     <div className="template-selector p-8 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl font-bold text-center mb-6">Select a Resume Template</h2>
+      <h2 className="text-3xl font-bold text-center mb-8">Select a Resume Template</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {templates.map((template) => (
           <div
@@ -56,13 +61,16 @@ const TemplateSelector = () => {
               selectedTemplate === template.id ? "border-blue-500" : "border-gray-300"
             }`}
           >
-            <img
-              src={template.previewImage}
-              alt={`${template.name} Preview`}
-              className="w-full h-40 object-cover mb-4 rounded"
-            />
-            <h3 className="text-lg font-semibold mb-2">{template.name}</h3>
-            <p className="text-sm mb-4">{template.description}</p>
+            {/* Resume-shaped container */}
+            <div className="w-full h-65 overflow-hidden flex items-center justify-center mb-4 rounded bg-white"> {/* Adjusted height to fit resume */}
+              <img
+                src={template.previewImage}
+                alt={`${template.name} Preview`}
+                className="w-full h-full object-contain" 
+              /> {/* Updated to fully fit the resume */}
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-center">{template.name}</h3>
+            <p className="text-sm text-gray-600 mb-4 text-center">{template.description}</p>
             <div className="flex justify-between">
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
@@ -71,10 +79,10 @@ const TemplateSelector = () => {
                 Preview
               </button>
               <button
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded transition ${
                   selectedTemplate === template.id
                     ? "bg-green-500 text-white"
-                    : "bg-gray-500 text-white hover:bg-gray-600 transition"
+                    : "bg-gray-500 text-white hover:bg-gray-600"
                 }`}
                 onClick={() => handleSelectTemplate(template.id)}
               >
@@ -84,7 +92,7 @@ const TemplateSelector = () => {
           </div>
         ))}
       </div>
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <button
           className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition"
           onClick={handleContinue}

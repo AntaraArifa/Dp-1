@@ -30,12 +30,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS configuration
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5175"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`Blocked by CORS: ${origin}`);
       callback(new Error("CORS policy does not allow access from this origin"));
     }
   },
@@ -53,28 +54,29 @@ app.use("/api/v1/resumes", resumeRoute); // Register the Resume route
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
+  console.error(`[Error] ${err.message}`);
   res.status(err.status || 500).json({
-    error: {
-      message: err.message || "Internal Server Error",
-    },
+    success: false,
+    message: err.message || "Internal Server Error",
   });
 });
 
 // Server and Database Initialization
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 
 const startServer = async () => {
   try {
-    await connectDB(); // Ensure the database is connected before starting the server
+    // Connect to the database
+    await connectDB();
     console.log("Database connection established successfully.");
 
+    // Start the server
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to connect to the database:", error.message);
-    process.exit(1); // Exit the process with a failure code
+    console.error("Failed to save resume:", error.response ? error.response.data : error.message);
+    alert("Failed to save resume. Please try again.");
   }
 };
 
