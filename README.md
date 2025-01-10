@@ -1,8 +1,8 @@
-# SmsrtHire Job Portal
+# SmartHire Job Portal
 
 ## Project Overview
 
-SmsrtHire is a comprehensive job portal application that allows users to:
+SmsatHire is a comprehensive job portal application that allows users to:
 - Apply for jobs.
 - Build and manage resumes.
 - Manage job applications.
