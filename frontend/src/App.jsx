@@ -22,8 +22,25 @@ import Applicants from "./components/admin/Applicants";
 // Resume Builder Components
 import ResumeEditor from "./components/ResumeEditor";
 import TemplateSelector from "./components/TemplateSelector";
-import Preview from "./components/Preview";
-import TemplatePreview from "./components/TemplatePreview";
+import TemplatePreview from "./components/TemplatePreview"; // TemplatePreview is the unified preview component
+
+// Hook to fetch resume data
+import { useGetResumeData } from "./hooks/useGetResumeData";
+
+// Dynamic Template Preview Component
+const DynamicTemplatePreview = () => {
+  const { data, error } = useGetResumeData();
+
+  if (error) {
+    return <h1 className="text-center text-red-600">Error Loading Resume Data</h1>;
+  }
+
+  if (!data) {
+    return <h1 className="text-center text-blue-600">Loading...</h1>;
+  }
+
+  return <TemplatePreview selectedTemplate="modern" resumeData={data} />;
+};
 
 const appRouter = createBrowserRouter([
   // Job Seeker Routes
@@ -47,11 +64,14 @@ const appRouter = createBrowserRouter([
   // Resume Builder Routes
   { path: "/resume/edit", element: <ResumeEditor /> },
   { path: "/resume/templates", element: <TemplateSelector /> },
-  { path: "/resume/templates/:id", element: <TemplatePreview /> }, // Dynamic route for previewing a specific template
-  { path: "/resume/preview", element: <Preview /> },
+  {
+    path: "/resume/templates/:id",
+    element: <DynamicTemplatePreview />, // Dynamically render template previews
+  },
+  { path: "/resume/preview", element: <TemplatePreview selectedTemplate="modern" /> }, // Unified component for preview
 
   // Fallback Route for 404
-  { path: "*", element: <h1 className='text-center text-red-600'>404 - Page Not Found</h1> },
+  { path: "*", element: <h1 className="text-center text-red-600">404 - Page Not Found</h1> },
 ]);
 
 function App() {
