@@ -2,42 +2,42 @@ import React from "react";
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
-  page: {
+  Page: {
     padding: 30,
     fontFamily: "Helvetica",
     fontSize: 12,
     lineHeight: 1.6,
     color: "#333",
   },
-  header: {
+  Header: {
     fontSize: 24,
     marginBottom: 10,
     fontWeight: "bold",
     color: "#333",
   },
-  contact: {
+  Contact: {
     fontSize: 10,
     marginBottom: 20,
     color: "#666",
   },
-  section: {
+  Section: {
     marginBottom: 15,
   },
-  sectionHeader: {
+  SectionHeader: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 5,
     color: "#000",
     borderBottom: "1px solid #ccc",
   },
-  text: {
+  Text: {
     marginBottom: 5,
   },
-  boldText: {
+  BoldText: {
     fontWeight: "bold",
     color: "#000",
   },
-  listItem: {
+  ListItem: {
     marginBottom: 3,
   },
 });
@@ -45,19 +45,19 @@ const styles = StyleSheet.create({
 export default function ModernTemplate({ data }) {
   return (
     <Document>
-      <Page style={styles.page}>
+      <Page style={styles.Page}>
         {/* Header Section */}
-        <Text style={styles.header}>{data.name}</Text>
-        <Text style={styles.contact}>
+        <Text style={styles.Header}>{data.name}</Text>
+        <Text style={styles.Contact}>
           {data.email} | {data.phone} | {data.address}
         </Text>
 
         {/* Education Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Education</Text>
+        <View style={styles.Section}>
+          <Text style={styles.SectionHeader}>Education</Text>
           {data.education.map((edu, idx) => (
-            <View key={idx} style={styles.text}>
-              <Text style={styles.boldText}>{edu.degree}</Text>
+            <View key={idx} style={styles.Text}>
+              <Text style={styles.BoldText}>{edu.degree}</Text>
               <Text>
                 {edu.institution} - {edu.year}
               </Text>
@@ -66,11 +66,11 @@ export default function ModernTemplate({ data }) {
         </View>
 
         {/* Experience Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Experience</Text>
+        <View style={styles.Section}>
+          <Text style={styles.SectionHeader}>Experience</Text>
           {data.experience.map((exp, idx) => (
-            <View key={idx} style={styles.text}>
-              <Text style={styles.boldText}>
+            <View key={idx} style={styles.Text}>
+              <Text style={styles.BoldText}>
                 {exp.jobTitle} at {exp.company}
               </Text>
               <Text>{exp.duration}</Text>
@@ -80,10 +80,10 @@ export default function ModernTemplate({ data }) {
         </View>
 
         {/* Skills Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Skills</Text>
+        <View style={styles.Section}>
+          <Text style={styles.SectionHeader}>Skills</Text>
           {data.skills.map((skill, idx) => (
-            <Text key={idx} style={styles.listItem}>
+            <Text key={idx} style={styles.ListItem}>
               • {skill}
             </Text>
           ))}
