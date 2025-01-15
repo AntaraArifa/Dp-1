@@ -75,8 +75,8 @@ const startServer = async () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to save resume:", error.response ? error.response.data : error.message);
-    alert("Failed to save resume. Please try again.");
+    console.error("Error starting the server:", error.message);
+    process.exit(1); // Exit the process on failure
   }
 };
 

@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import ModernTemplate from "./templates/ModernTemplate";
 import ClassicTemplate from "./templates/ClassicTemplate";
 import CreativeTemplate from "./templates/CreativeTemplate";
+import axios from "axios";
 import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
+import { RESUME_API_END_POINT } from "./utils/constant";
+console.log("API Endpoint:", RESUME_API_END_POINT);
+
 
 const templates = {
   modern: ModernTemplate,
@@ -10,20 +14,30 @@ const templates = {
   creative: CreativeTemplate,
 };
 
-const TemplatePreview = ({ selectedTemplate, resumeData }) => {
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+const TemplatePreview = ({ selectedTemplate }) => {
+  const [resumeData, setResumeData] = useState(null);
+  const [error, setError] = useState(null);
   const SelectedTemplate = templates[selectedTemplate];
 
   useEffect(() => {
-    // Simulate data loading
-    if (resumeData && Object.keys(resumeData).length > 0) {
-      setIsDataLoaded(true); // Mark data as loaded
-    } else {
-      setIsDataLoaded(false);
-    }
-  }, [resumeData]); // Re-run when resumeData changes
+    const fetchLatestResume = async () => {
+      try {
+        const response = await axios.get(`${RESUME_API_END_POINT}/latest`);
+        setResumeData(response.data);
+      } catch (err) {
+        console.error("Error fetching the latest resume:", err);
+        setError("Failed to load the latest resume.");
+      }
+    };
 
-  if (!SelectedTemplate || !isDataLoaded) {
+    fetchLatestResume();
+  }, []);
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (!resumeData) {
     return <p>Loading...</p>;
   }
 
@@ -34,7 +48,6 @@ const TemplatePreview = ({ selectedTemplate, resumeData }) => {
       <PDFViewer style={{ width: "100%", height: "100vh" }}>
         <SelectedTemplate data={resumeData} />
       </PDFViewer>
-
       {/* PDFDownloadLink for downloading the PDF */}
       <PDFDownloadLink
         document={<SelectedTemplate data={resumeData} />}

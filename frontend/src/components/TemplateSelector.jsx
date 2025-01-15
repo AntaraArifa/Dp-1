@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { RESUME_API_END_POINT } from './utils/constants';
 
 // Import images
 import modernTemplate from "../assets/templates/modern.png";

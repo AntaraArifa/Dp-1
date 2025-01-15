@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { RESUME_API_END_POINT } from './utils/constants';
 
 const ResumeEditor = () => {
   const navigate = useNavigate();
