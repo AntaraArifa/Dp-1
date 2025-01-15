@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { RESUME_API_END_POINT } from './utils/constants';
+import { RESUME_API_END_POINT } from "../utils/constant"; 
 
 const ResumeEditor = () => {
   const navigate = useNavigate();
@@ -49,9 +49,9 @@ const ResumeEditor = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/api/v1/resumes", formData); // Update the URL here
+      const response = await axios.post(`${RESUME_API_END_POINT}`, formData); // Use the imported constant
       const { resume } = response.data;
-  
+
       // Navigate to TemplateSelector with resumeId in state
       navigate(`/resume/templates`, { state: { resumeId: resume._id } });
     } catch (error) {
@@ -163,7 +163,9 @@ const ResumeEditor = () => {
                 placeholder="Job Title"
                 className="border p-2 mr-2"
                 value={exp.jobTitle}
-                onChange={(e) => handleChange(e, "experience", index, "jobTitle")}
+                onChange={(e) =>
+                  handleChange(e, "experience", index, "jobTitle")
+                }
               />
               <input
                 type="text"
@@ -177,7 +179,9 @@ const ResumeEditor = () => {
                 placeholder="Duration"
                 className="border p-2 mr-2"
                 value={exp.duration}
-                onChange={(e) => handleChange(e, "experience", index, "duration")}
+                onChange={(e) =>
+                  handleChange(e, "experience", index, "duration")
+                }
               />
               <textarea
                 placeholder="Description"

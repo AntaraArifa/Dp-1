@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RESUME_API_END_POINT } from './utils/constants';
+import { RESUME_API_END_POINT } from "../utils/constant"; 
 
 // Import images
 import modernTemplate from "../assets/templates/modern.png";
@@ -35,21 +35,27 @@ const TemplateSelector = () => {
   // Handle template selection
   const handleSelectTemplate = (templateId) => {
     setSelectedTemplate(templateId);
+    console.log("Selected Template ID:", templateId);
+    console.log("API Endpoint:", RESUME_API_END_POINT); // Log the API endpoint
   };
 
   // Navigate to preview page for a specific template
   const handlePreviewTemplate = (templateId) => {
+    console.log("Navigating to preview for Template ID:", templateId);
+    console.log("Using API Endpoint:", RESUME_API_END_POINT); // Log the API endpoint
     navigate(`/template-preview/${templateId}`);
   };
 
   // Confirm template selection and navigate to the resume generation page
-const handleContinue = () => {
-  if (selectedTemplate) {
-    navigate(`/resume/templates/${selectedTemplate}`);
-  } else {
-    alert("Please select a template to continue.");
-  }
-};
+  const handleContinue = () => {
+    if (selectedTemplate) {
+      console.log("Continuing with Template ID:", selectedTemplate);
+      console.log("API Endpoint:", RESUME_API_END_POINT); // Log the API endpoint
+      navigate(`/resume/templates/${selectedTemplate}`);
+    } else {
+      alert("Please select a template to continue.");
+    }
+  };
 
   return (
     <div className="template-selector p-8 bg-gray-100 min-h-screen">
@@ -63,12 +69,12 @@ const handleContinue = () => {
             }`}
           >
             {/* Resume-shaped container */}
-            <div className="w-full h-65 overflow-hidden flex items-center justify-center mb-4 rounded bg-white"> {/* Adjusted height to fit resume */}
+            <div className="w-full h-65 overflow-hidden flex items-center justify-center mb-4 rounded bg-white">
               <img
                 src={template.previewImage}
                 alt={`${template.name} Preview`}
-                className="w-full h-full object-contain" 
-              /> {/* Updated to fully fit the resume */}
+                className="w-full h-full object-contain"
+              />
             </div>
             <h3 className="text-lg font-semibold mb-2 text-center">{template.name}</h3>
             <p className="text-sm text-gray-600 mb-4 text-center">{template.description}</p>

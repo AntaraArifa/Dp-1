@@ -4,8 +4,8 @@ import ClassicTemplate from "./templates/ClassicTemplate";
 import CreativeTemplate from "./templates/CreativeTemplate";
 import axios from "axios";
 import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
-import { RESUME_API_END_POINT } from "./utils/constant";
-console.log("API Endpoint:", RESUME_API_END_POINT);
+import { RESUME_API_END_POINT } from "../utils/constant";
+
 
 
 const templates = {
