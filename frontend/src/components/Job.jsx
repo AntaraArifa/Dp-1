@@ -22,11 +22,11 @@ const Job = ({job}) => {
             <Button variant="outline" className="rounded-full" size="icon"><Bookmark /></Button>
             </div>
             <div className='flex items-center gap-2 my-2'>
-                <Button className="p-6" variant="outline" size="icon">
-                    <Avatar>
+                
+                    <Avatar size="flex">
                         <AvatarImage src={job?.company?.logo} />
                     </Avatar>
-                </Button>
+                
                 <div>
                     <h3 className='font-medium text-lg'>{job?.company?.name}</h3>
                     <p className='text-sm text-gray-500'>Bangladesh</p>

@@ -11,6 +11,17 @@ const registerCompany = async (req, res) => {
                 success: false
             });
         }
+
+        // Check if the employer has already registered a company
+        const existingCompany = await Company.findOne({ userId: req.id });
+        if (existingCompany) {
+            return res.status(400).json({
+                message: "You can only register one company.",
+                success: false
+            });
+        }
+
+        // Check if the company name is already taken
         let company = await Company.findOne({ name: companyName });
         if (company) {
             return res.status(400).json({
@@ -18,6 +29,8 @@ const registerCompany = async (req, res) => {
                 success: false
             });
         }
+
+        // Create a new company for the employer
         company = await Company.create({
             name: companyName,
             userId: req.id
@@ -32,6 +45,8 @@ const registerCompany = async (req, res) => {
         console.log(error);
     }
 };
+
+
 
 const getCompany = async (req, res) => {
     try {
