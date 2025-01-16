@@ -3,7 +3,6 @@ import {
   createResume,
   getResumes,
   getResumeById,
-  getLatestResume,
   updateResume,
   deleteResume,
 } from "../controllers/resume.controller.js";
@@ -29,13 +28,7 @@ router.get("/", getResumes);
  * @desc Get the latest resume
  * @access Public
  */
-router.get("/latest", getLatestResume);
 
-/**
- * @route GET /api/v1/resumes/:id
- * @desc Get a specific resume by ID
- * @access Public
- */
 router.get("/:id", getResumeById);
 
 /**

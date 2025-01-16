@@ -1,28 +1,31 @@
-import { useState, useEffect } from "react"; // Ensure this import is present
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { RESUME_API_END_POINT } from "../utils/constant";
 
-export function useGetResumeData() {
+// Assuming you will fetch by a specific ID
+export const useGetResumeData = (resumeId) => {  // Take resumeId as an argument
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchResumeData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/v1/resumes");
-        if (response.data && Array.isArray(response.data)) {
-          const latestResume = response.data[0];
-          setData(latestResume);
+        const response = await axios.get(`${RESUME_API_END_POINT}/resumes/${resumeId}`);  // Use the ID to fetch specific resume
+        if (response.data) {
+          setData(response.data);  // Handle the response data as needed
         } else {
-          console.error("Unexpected data format:", response.data);
+          setError("No resume found.");
         }
       } catch (err) {
         console.error("Error fetching resume data:", err);
-        setError(err);
+        setError("Failed to load resume data.");
       }
     };
 
-    fetchResumeData();
-  }, []);
+    if (resumeId) {
+      fetchResumeData();
+    }
+  }, [resumeId]);  // Only re-fetch when resumeId changes
 
   return { data, error };
-}
+};
