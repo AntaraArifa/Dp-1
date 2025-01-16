@@ -1,58 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import useGetAllUserChats from "@/hooks/useGetAllUserChats";
 import { setSelectedChat } from "@/redux/chatSlice";
+import useGetAllUserChats from "@/hooks/useGetAllUserChats";
 import AddMembersDialog from "../AddMembersDialog";
-import CreateGroupChatDialog from "../CreateGroupChatDialog"; // Import the dialog
+import CreateGroupChatDialog from "../CreateGroupChatDialog";
 
 const ChatList = ({ onChatSelect }) => {
   const [searchText, setSearchText] = useState("");
-  const [searchedChats, setSearchedChats] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState(null);
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [isGroupChatDialogOpen, setIsGroupChatDialogOpen] = useState(false);
-  
-  const loggedInUserId = useSelector((store) => store.auth.user?._id); // Ensure `user` has `_id`
+
+  const loggedInUserId = useSelector((store) => store.auth.user?._id);
+  const allChats = useSelector((store) => store.chat.allChats);
+  const selectedChat = useSelector((store) => store.chat.selectedChat);
+
   const dispatch = useDispatch();
 
+  // Fetch all user chats
   useGetAllUserChats();
 
-  const allChats = useSelector((store) => store.chat.allChats);
-  const searchStatus = useSelector((store) => store.chat.status);
-
-  const handleSearch = () => {
-    if (!searchText.trim()) {
-      setSearchedChats(null);
-      return;
-    }
-
-    const results = Array.isArray(allChats?.chats)
-      ? allChats.chats.filter((chat) => {
-          if (chat.isGroupChat) {
-            return chat.chatName
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase());
-          } else {
-            const recipient = chat.users.find(
-              (user) => user._id !== loggedInUserId
-            );
-            return recipient?.email
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase());
-          }
-        })
-      : [];
-    setSearchedChats({ chats: results });
-  };
-
   const handleChatSelect = (chat) => {
-    if (!chat) return; // Guard against undefined chat
+    if (!chat) return;
     dispatch(setSelectedChat(chat));
     if (onChatSelect) onChatSelect(chat);
   };
-
-  const chatsToDisplay = searchedChats || allChats;
 
   const handleDialogClose = () => {
     setIsDialogOpen(false);
@@ -71,12 +44,29 @@ const ChatList = ({ onChatSelect }) => {
   };
 
   const handleNewGroupChat = (newChat) => {
-    setSearchedChats((prev) => (prev?.chats ? [newChat, ...prev.chats] : [newChat]));
+    dispatch({
+      type: "chat/addChat",
+      payload: newChat,
+    });
     setIsGroupChatDialogOpen(false);
   };
 
+  // Dynamically filter chats based on search input and `allChats`
+  const filteredChats = React.useMemo(() => {
+    if (!searchText.trim()) return allChats?.chats || [];
+    return allChats?.chats?.filter((chat) => {
+      if (chat.isGroupChat) {
+        return chat.chatName?.toLowerCase().includes(searchText.toLowerCase());
+      } else {
+        const recipient = chat.users.find((user) => user._id !== loggedInUserId);
+        return recipient?.fullname?.toLowerCase().includes(searchText.toLowerCase());
+      }
+    }) || [];
+  }, [searchText, allChats, loggedInUserId]);
+
   return (
     <div className="w-1/3 border-r h-screen bg-white">
+      {/* Header */}
       <div className="p-4 border-b flex justify-between items-center">
         <h2 className="text-lg font-semibold">Chats</h2>
         <button
@@ -87,6 +77,7 @@ const ChatList = ({ onChatSelect }) => {
         </button>
       </div>
 
+      {/* Search Bar */}
       <div className="p-4 border-b flex items-center">
         <input
           type="text"
@@ -95,26 +86,12 @@ const ChatList = ({ onChatSelect }) => {
           onChange={(e) => setSearchText(e.target.value)}
           className="w-full p-2 rounded border"
         />
-        <button
-          onClick={handleSearch}
-          className="ml-2 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
-        >
-          Search
-        </button>
       </div>
 
-      {searchStatus === "loading" && (
-        <div className="p-4 text-center text-gray-500">Loading chats...</div>
-      )}
-      {searchStatus === "failed" && (
-        <div className="p-4 text-center text-red-500">
-          Failed to load chats. Please try again.
-        </div>
-      )}
-
+      {/* Chat List */}
       <ul>
-        {Array.isArray(chatsToDisplay?.chats) && chatsToDisplay.chats.length > 0 ? (
-          chatsToDisplay.chats.map((chat) => {
+        {filteredChats.length > 0 ? (
+          filteredChats.map((chat) => {
             const recipient = chat.isGroupChat
               ? null
               : chat.users.find((user) => user._id !== loggedInUserId);
@@ -148,17 +125,19 @@ const ChatList = ({ onChatSelect }) => {
                       : "No messages yet"}
                   </p>
                 </div>
-                <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openAddMembersDialog(chat._id);
-                    }}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    ⋮
-                  </button>
-                </div>
+                {chat.isGroupChat && (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openAddMembersDialog(chat._id);
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ⋮
+                    </button>
+                  </div>
+                )}
               </li>
             );
           })
@@ -169,6 +148,7 @@ const ChatList = ({ onChatSelect }) => {
         )}
       </ul>
 
+      {/* Dialogs */}
       {dialogType === "addMembers" && selectedChatId && (
         <AddMembersDialog
           open={isDialogOpen}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import useGetAllChatMessages from "@/hooks/useGetAllChatMessages";
 import axios from "axios";
@@ -10,11 +10,19 @@ import { addMessage } from "@/redux/messageSlice";
 const ChatBox = () => {
   const loggedInUserId = useSelector((store) => store.auth.user); 
   const selectedChat = useSelector((store) => store.chat.selectedChat); 
-  const { messages, loading, error } = useGetAllChatMessages(selectedChat);
+  const { messages: initialMessages, loading, error } = useGetAllChatMessages(selectedChat);
 
+  const [messages, setMessages] = useState([]); 
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [leaving, setLeaving] = useState(false);
+
+  // Sync initial messages to local state
+  useEffect(() => {
+    if (initialMessages) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedChat?._id) {
@@ -30,7 +38,14 @@ const ChatBox = () => {
         { withCredentials: true }
       );
 
-      store.dispatch(addMessage(response.data)); 
+      const sentMessage = response.data;
+
+      // Update Redux store
+      store.dispatch(addMessage(sentMessage));
+
+      // Update local messages state
+      setMessages((prevMessages) => [...prevMessages, sentMessage]);
+
       setNewMessage("");
     } catch (error) {
       console.error("Failed to send message:", error.response?.data || error.message);

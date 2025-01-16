@@ -35,7 +35,11 @@ const CompanyCreate = () => {
         navigate(`/admin/companies/${companyId}`);
       }
     } catch (error) {
-      console.log(error);
+      if (error.response?.status === 400) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Something went wrong. Please try again later.");
+      }
     }
   };
 
