@@ -6,6 +6,7 @@ import validator from "validator";
 export const createResume = async (req, res) => {
   try {
     console.log("Creating Resume Request Received");
+    console.log("Request Body:", req.body); // Log the incoming data from the frontend
 
     const { name, email, phone, address, education, experience, skills } = req.body;
 
@@ -42,6 +43,10 @@ export const createResume = async (req, res) => {
 // Fetch all resumes
 export const getResumes = async (req, res) => {
   try {
+    console.log("Fetching all resumes. Request received.");
+    console.log("Request Params:", req.params); // Log the incoming params if any
+    console.log("Request Query:", req.query); // Log the query if there are any query params
+
     const resumes = await Resume.find();
     return res.status(200).json({ message: "Resumes retrieved successfully", resumes });
   } catch (error) {
@@ -54,6 +59,9 @@ export const getResumes = async (req, res) => {
 export const getResumeById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    console.log("Fetching resume by ID. Request received.");
+    console.log("Requested Resume ID:", id); // Log the ID parameter
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid resume ID." });
@@ -74,6 +82,8 @@ export const getResumeById = async (req, res) => {
 // Fetch the latest resume (assuming latest is the most recently created one)
 export const getLatestResume = async (req, res) => {
   try {
+    console.log("Fetching the latest resume. Request received.");
+
     const latestResume = await Resume.findOne().sort({ createdAt: -1 }); // Sorting by creation date descending
 
     if (!latestResume) {
@@ -91,6 +101,10 @@ export const getLatestResume = async (req, res) => {
 export const updateResume = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("Updating resume. Request received.");
+    console.log("Request Params:", req.params); // Log the incoming params if any
+    console.log("Request Body:", req.body); // Log the incoming data from the frontend
+
     const { name, email, phone, address, education, experience, skills } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -118,6 +132,9 @@ export const updateResume = async (req, res) => {
 export const deleteResume = async (req, res) => {
   try {
     const { id } = req.params;
+
+    console.log("Deleting resume. Request received.");
+    console.log("Requested Resume ID:", id); // Log the ID parameter
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid resume ID." });

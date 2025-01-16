@@ -12,7 +12,8 @@ const templates = {
 };
 
 const TemplatePreview = ({ selectedTemplate, resumeId }) => {  // Pass resumeId here
-  const { data, error } = useGetResumeData(resumeId);  // Fetch data based on the passed ID
+  const { data, error } = useGetResumeData(resumeId); 
+  console.log("hookdata :" + data) // Fetch data based on the passed ID
   const SelectedTemplate = templates[selectedTemplate];
 
   if (error) {

@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, useParams } from "react-router-dom";
 import "./App.css";
 
 // Job Seeker Components
@@ -29,7 +29,8 @@ import { useGetResumeData } from "./hooks/useGetResumeData";
 
 // Dynamic Template Preview Component
 const DynamicTemplatePreview = () => {
-  const { data, error } = useGetResumeData();
+  const { id } = useParams();  // Extract `id` from the URL parameters
+  const { data, error } = useGetResumeData(id);  // Pass the extracted `id` to the hook
 
   if (error) {
     return <h1 className="text-center text-red-600">Error Loading Resume Data</h1>;

@@ -10,9 +10,10 @@ export const useGetResumeData = (resumeId) => {  // Take resumeId as an argument
   useEffect(() => {
     const fetchResumeData = async () => {
       try {
-        const response = await axios.get(`${RESUME_API_END_POINT}/resumes/${resumeId}`);  // Use the ID to fetch specific resume
+        // Correct the URL by removing the extra '/resumes/'
+        const response = await axios.get(`${RESUME_API_END_POINT}/${resumeId}`);  // Use the correct endpoint
         if (response.data) {
-          setData(response.data);  // Handle the response data as needed
+          setData(response.data);  // Set the resume data
         } else {
           setError("No resume found.");
         }
