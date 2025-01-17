@@ -1,8 +1,11 @@
+//resumeSlice
+
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   selectedTemplate: null,
   resumeData: null,
+  singleResume: null, // Added to store single resume data
   error: null,
   loading: false,
 };
@@ -17,6 +20,9 @@ const resumeSlice = createSlice({
     setResumeData: (state, action) => {
       state.resumeData = action.payload;
     },
+    setSingleResume: (state, action) => {
+      state.singleResume = action.payload; // Updates the state with single resume data
+    },
     setLoading: (state, action) => {
       state.loading = action.payload ?? true;
     },
@@ -28,6 +34,7 @@ const resumeSlice = createSlice({
     },
     clearResumeData: (state) => {
       state.resumeData = null;
+      state.singleResume = null; // Clear single resume data
       state.selectedTemplate = null;
       state.error = null;
       state.loading = false;
@@ -38,6 +45,7 @@ const resumeSlice = createSlice({
 export const {
   setSelectedTemplate,
   setResumeData,
+  setSingleResume, // Export the new action
   setLoading,
   setError,
   clearError,
