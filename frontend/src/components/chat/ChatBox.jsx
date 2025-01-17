@@ -42,6 +42,7 @@ const ChatBox = () => {
 
       // Update Redux store
       store.dispatch(addMessage(sentMessage));
+      
 
       // Update local messages state
       setMessages((prevMessages) => [...prevMessages, sentMessage]);

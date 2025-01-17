@@ -20,6 +20,7 @@ const chatSlice = createSlice({
         clearSelectedChat: (state) => {
             state.selectedChat = null;
         },
+        
     },
 });
 

@@ -33,16 +33,16 @@ const router = createBrowserRouter([
   { path: "/jobs", element: <Jobs /> },
   { path: "/browse", element: <Browse /> },
   { path: "/profile", element: <Profile /> },
-  { path: "/job-description/:jobId", element: <JobDescription /> },
+  { path: "/description/:id", element: <JobDescription /> },
   { path: "/chat", element: <ChatPage /> },
 
   // Admin Routes
   { path: "/admin/companies", element: <Companies /> },
   { path: "/admin/companies/create", element: <CompanyCreate /> },
-  { path: "/admin/companies/setup/:companyId", element: <CompanySetup /> },
+  { path: "/admin/companies/:id", element: <CompanySetup /> },
   { path: "/admin/jobs", element: <AdminJobs /> },
-  { path: "/admin/jobs/post", element: <PostJob /> },
-  { path: "/admin/applicants", element: <Applicants /> },
+  { path: "/admin/jobs/create", element: <PostJob /> },
+  { path: "/admin/jobs/:id/applicants", element: <Applicants /> },
 
   // Resume Builder Routes
   { path: "/resume/edit", element: <ResumeEditor /> },
