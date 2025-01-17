@@ -2,31 +2,58 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { RESUME_API_END_POINT } from "../utils/constant";
 
-// Assuming you will fetch by a specific ID
-export const useGetResumeData = (resumeId) => {  // Take resumeId as an argument
-  const [data, setData] = useState(null);
+// Helper to validate ObjectId format (24-character hexadecimal string)
+const isValidObjectId = (id) => /^[a-f\d]{24}$/i.test(id);
+
+export default function useGetResumeData(resumeId) {
+  const [resumeData, setResumeData] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!resumeId) {
+      setError("No resumeId provided.");
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidObjectId(resumeId)) {
+      setError("Invalid resumeId format.");
+      setLoading(false);
+      return;
+    }
+
     const fetchResumeData = async () => {
       try {
-        // Correct the URL by removing the extra '/resumes/'
-        const response = await axios.get(`${RESUME_API_END_POINT}/${resumeId}`);  // Use the correct endpoint
-        if (response.data) {
-          setData(response.data);  // Set the resume data
+        setLoading(true);
+        setError(null); // Clear previous errors
+
+        console.log(`Fetching data for resumeId: ${resumeId}`);
+
+        const response = await axios.get(`${RESUME_API_END_POINT}/${resumeId}`);
+        if (response.data?.resume) {
+          setResumeData(response.data.resume);
         } else {
-          setError("No resume found.");
+          throw new Error("Unexpected API response format");
         }
       } catch (err) {
-        console.error("Error fetching resume data:", err);
-        setError("Failed to load resume data.");
+        console.error("Error fetching resume data:", err.message);
+
+        // Specific error handling based on status codes
+        if (err.response?.status === 400) {
+          setError("Invalid request. Please check the resume ID and try again.");
+        } else if (err.response?.status === 404) {
+          setError("Resume not found. Please ensure the ID is correct.");
+        } else {
+          setError("An error occurred while fetching the resume data.");
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (resumeId) {
-      fetchResumeData();
-    }
-  }, [resumeId]);  // Only re-fetch when resumeId changes
+    fetchResumeData();
+  }, [resumeId]);
 
-  return { data, error };
-};
+  return { resumeData, error, loading };
+}

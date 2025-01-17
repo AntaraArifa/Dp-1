@@ -22,61 +22,87 @@ import Applicants from "./components/admin/Applicants";
 // Resume Builder Components
 import ResumeEditor from "./components/ResumeEditor";
 import TemplateSelector from "./components/TemplateSelector";
-import TemplatePreview from "./components/TemplatePreview"; // TemplatePreview is the unified preview component
-
-// Hook to fetch resume data
-import { useGetResumeData } from "./hooks/useGetResumeData";
+import TemplatePreview from "./components/TemplatePreview";
 
 // Dynamic Template Preview Component
 const DynamicTemplatePreview = () => {
-  const { id } = useParams();  // Extract `id` from the URL parameters
-  const { data, error } = useGetResumeData(id);  // Pass the extracted `id` to the hook
-
-  if (error) {
-    return <h1 className="text-center text-red-600">Error Loading Resume Data</h1>;
-  }
-
-  if (!data) {
-    return <h1 className="text-center text-blue-600">Loading...</h1>;
-  }
-
-  return <TemplatePreview selectedTemplate="modern" resumeData={data} />;
+  const { templateId, resumeId } = useParams(); // Access dynamic params from the URL
+  return <TemplatePreview selectedTemplate={templateId} resumeId={resumeId} />;
 };
 
-const appRouter = createBrowserRouter([
-  // Job Seeker Routes
-  { path: "/", element: <Home /> },
-  { path: "/login", element: <Login /> },
-  { path: "/signup", element: <Signup /> },
-  { path: "/jobs", element: <Jobs /> },
-  { path: "/browse", element: <Browse /> },
-  { path: "/profile", element: <Profile /> },
-  { path: "/description/:id", element: <JobDescription /> },
-  { path: "/chat", element: <ChatPage /> },
-
-  // Admin Routes
-  { path: "/admin/companies", element: <Companies /> },
-  { path: "/admin/companies/create", element: <CompanyCreate /> },
-  { path: "/admin/companies/:id", element: <CompanySetup /> },
-  { path: "/admin/jobs", element: <AdminJobs /> },
-  { path: "/admin/jobs/create", element: <PostJob /> },
-  { path: "/admin/jobs/:id/applicants", element: <Applicants /> },
-
-  // Resume Builder Routes
-  { path: "/resume/edit", element: <ResumeEditor /> },
-  { path: "/resume/templates", element: <TemplateSelector /> },
+// Define routes using createBrowserRouter
+const router = createBrowserRouter([
   {
-    path: "/resume/templates/:id",
-    element: <DynamicTemplatePreview />, // Dynamically render template previews
+    path: "/",
+    element: <Home />,
   },
-  { path: "/resume/preview", element: <TemplatePreview selectedTemplate="modern" /> }, // Unified component for preview
-
-  // Fallback Route for 404
-  { path: "*", element: <h1 className="text-center text-red-600">404 - Page Not Found</h1> },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+  },
+  {
+    path: "/jobs",
+    element: <Jobs />,
+  },
+  {
+    path: "/browse",
+    element: <Browse />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/job-description/:jobId",
+    element: <JobDescription />,
+  },
+  {
+    path: "/chat",
+    element: <ChatPage />,
+  },
+  {
+    path: "/admin/companies",
+    element: <Companies />,
+  },
+  {
+    path: "/admin/companies/create",
+    element: <CompanyCreate />,
+  },
+  {
+    path: "/admin/companies/setup/:companyId",
+    element: <CompanySetup />,
+  },
+  {
+    path: "/admin/jobs",
+    element: <AdminJobs />,
+  },
+  {
+    path: "/admin/jobs/post",
+    element: <PostJob />,
+  },
+  {
+    path: "/admin/applicants",
+    element: <Applicants />,
+  },
+  {
+    path: "/resume/edit",
+    element: <ResumeEditor />,
+  },
+  {
+    path: "/resume/templates",
+    element: <TemplateSelector />, // Replace with the appropriate component
+  },
+  {
+    path: "/resume-builder/template-preview/:templateId/:resumeId",
+    element: <DynamicTemplatePreview />,
+  },
 ]);
 
-function App() {
-  return <RouterProvider router={appRouter} />;
+// Main App Component
+export default function App() {
+  return <RouterProvider router={router} />;
 }
-
-export default App;

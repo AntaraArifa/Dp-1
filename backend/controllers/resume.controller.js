@@ -33,6 +33,8 @@ export const createResume = async (req, res) => {
     const resume = new Resume(resumeData);
     await resume.save();
 
+    console.log("Resume created with ID:", resume._id); // Log the ID of the newly created resume
+
     return res.status(201).json({ message: "Resume created successfully", resume });
   } catch (error) {
     console.error("Error creating resume:", error.stack);
@@ -58,23 +60,35 @@ export const getResumes = async (req, res) => {
 // Fetch a resume by ID
 export const getResumeById = async (req, res) => {
   try {
+    console.log("[INFO] Received request to fetch resume by ID");
+
     const { id } = req.params;
+    console.log("[DEBUG] Requested Resume ID:", id);
 
-    console.log("Fetching resume by ID. Request received.");
-    console.log("Requested Resume ID:", id); // Log the ID parameter
-
+    // Validate if the ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log("[ERROR] Invalid resume ID format:", id);
       return res.status(400).json({ message: "Invalid resume ID." });
     }
 
+    console.log("[INFO] Resume ID is valid. Proceeding to fetch from database.");
+
+    // Query the database for the resume with the given ObjectId
     const resume = await Resume.findById(id);
+
     if (!resume) {
+      console.log("[WARN] No resume found for ID:", id);
       return res.status(404).json({ message: "Resume not found." });
     }
 
+    console.log("[SUCCESS] Resume found for ID:", id);
+    console.log("[DEBUG] Resume Data:", JSON.stringify(resume, null, 2));
+
+    // Return the resume if it is found
     return res.status(200).json({ message: "Resume retrieved successfully", resume });
   } catch (error) {
-    console.error("Error fetching resume:", error.stack);
+    console.error("[ERROR] An error occurred while fetching the resume:");
+    console.error("[ERROR DETAILS]", error.stack);
     return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };

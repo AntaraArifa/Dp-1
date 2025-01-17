@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RESUME_API_END_POINT } from "../utils/constant"; 
-
-// Import images
+import { useDispatch } from "react-redux";
+import { setSelectedTemplate } from "../redux/resumeSlice";
 import modernTemplate from "../assets/templates/modern.png";
 import classicTemplate from "../assets/templates/classic.png";
 import creativeTemplate from "../assets/templates/creative.png";
@@ -29,28 +28,21 @@ const templates = [
 ];
 
 const TemplateSelector = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplateState] = useState(null);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Handle template selection
   const handleSelectTemplate = (templateId) => {
-    setSelectedTemplate(templateId);
-    console.log("Selected Template ID:", templateId);
-    console.log("API Endpoint:", RESUME_API_END_POINT); // Log the API endpoint
+    setSelectedTemplateState(templateId);
+    dispatch(setSelectedTemplate(templateId));
   };
 
-  // Navigate to preview page for a specific template
   const handlePreviewTemplate = (templateId) => {
-    console.log("Navigating to preview for Template ID:", templateId);
-    console.log("Using API Endpoint:", RESUME_API_END_POINT); // Log the API endpoint
-    navigate(`/template-preview/${templateId}`);
+    navigate(`/resume/templates/${templateId}`);
   };
 
-  // Confirm template selection and navigate to the resume generation page
   const handleContinue = () => {
     if (selectedTemplate) {
-      console.log("Continuing with Template ID:", selectedTemplate);
-      console.log("API Endpoint:", RESUME_API_END_POINT); // Log the API endpoint
       navigate(`/resume/templates/${selectedTemplate}`);
     } else {
       alert("Please select a template to continue.");
@@ -58,51 +50,49 @@ const TemplateSelector = () => {
   };
 
   return (
-    <div className="template-selector p-8 bg-gray-100 min-h-screen">
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
       <h2 className="text-3xl font-bold text-center mb-8">Select a Resume Template</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {templates.map((template) => (
           <div
             key={template.id}
-            className={`border rounded-lg p-4 shadow-md hover:shadow-lg transition cursor-pointer ${
-              selectedTemplate === template.id ? "border-blue-500" : "border-gray-300"
-            }`}
+            className={`relative bg-white rounded-lg shadow-lg border-2 ${
+              selectedTemplate === template.id ? "border-blue-500" : "border-transparent"
+            } hover:shadow-xl transition-shadow cursor-pointer`}
+            onClick={() => handleSelectTemplate(template.id)}
           >
-            {/* Resume-shaped container */}
-            <div className="w-full h-65 overflow-hidden flex items-center justify-center mb-4 rounded bg-white">
-              <img
-                src={template.previewImage}
-                alt={`${template.name} Preview`}
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <h3 className="text-lg font-semibold mb-2 text-center">{template.name}</h3>
-            <p className="text-sm text-gray-600 mb-4 text-center">{template.description}</p>
-            <div className="flex justify-between">
+            <img
+              src={template.previewImage}
+              alt={template.name}
+              className="rounded-t-lg w-full object-cover h-48"
+            />
+            <div className="p-4">
+              <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
+              <p className="text-gray-600 mb-4">{template.description}</p>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-                onClick={() => handlePreviewTemplate(template.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePreviewTemplate(template.id);
+                }}
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
               >
                 Preview
               </button>
-              <button
-                className={`px-4 py-2 rounded transition ${
-                  selectedTemplate === template.id
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-500 text-white hover:bg-gray-600"
-                }`}
-                onClick={() => handleSelectTemplate(template.id)}
-              >
-                {selectedTemplate === template.id ? "Selected" : "Select"}
-              </button>
             </div>
+            {selectedTemplate === template.id && (
+              <div className="absolute top-0 left-0 w-full h-full bg-blue-500 bg-opacity-10 border-2 border-blue-500 rounded-lg">
+                <div className="flex justify-center items-center h-full">
+                  <span className="text-blue-500 font-bold text-lg">Selected</span>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
-      <div className="mt-8 text-center">
+      <div className="flex justify-center mt-8">
         <button
-          className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition"
           onClick={handleContinue}
+          className="bg-green-500 text-white py-3 px-6 rounded-lg font-bold text-lg hover:bg-green-600 transition"
         >
           Continue
         </button>
