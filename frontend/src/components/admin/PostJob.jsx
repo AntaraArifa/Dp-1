@@ -6,8 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button } from '../ui/button'
 import { Loader2 } from 'lucide-react'
-
-import { Select, SelectTrigger,SelectContent, SelectGroup, SelectItem, SelectValue } from '../ui/select'
+import { Select, SelectTrigger, SelectContent, SelectGroup, SelectItem, SelectValue } from '../ui/select'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { JOB_API_END_POINT } from '@/utils/constant'
@@ -28,34 +27,41 @@ const PostJob = () => {
     const navigate = useNavigate();
 
     const { companies } = useSelector(store => store.company);
+    
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
     };
-    const selectChangeHandler = (value) => {
-        const selectedCompany = companies.find((company)=> company.name.toLowerCase() === value);
-        setInput({...input, companyId:selectedCompany._id});
+    
+    const selectChangeHandler = (value, name) => {
+        if (name === 'company') {
+            const selectedCompany = companies.find((company) => company.name.toLowerCase() === value);
+            setInput({ ...input, companyId: selectedCompany._id });
+        } else {
+            setInput({ ...input, [name]: value });
+        }
     };
 
     const submitHandler = async (e) => {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await axios.post(`${JOB_API_END_POINT}/post`, input,{
-                headers:{
-                    'Content-Type':'application/json'
+            const res = await axios.post(`${JOB_API_END_POINT}/post`, input, {
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-                withCredentials:true
+                withCredentials: true
             });
-            if(res.data.success){
+            if (res.data.success) {
                 toast.success(res.data.message);
                 navigate("/admin/jobs");
             }
         } catch (error) {
             toast.error(error.response.data.message);
-        } finally{
+        } finally {
             setLoading(false);
         }
     }
+
     return (
         <div>
             <Navbar />
@@ -103,26 +109,6 @@ const PostJob = () => {
                             />
                         </div>
                         <div>
-                            <Label>Location</Label>
-                            <Input
-                                type="text"
-                                name="location"
-                                value={input.location}
-                                onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
-                            />
-                        </div>
-                        <div>
-                            <Label>Job Type</Label>
-                            <Input
-                                type="text"
-                                name="jobType"
-                                value={input.jobType}
-                                onChange={changeEventHandler}
-                                className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
-                            />
-                        </div>
-                        <div>
                             <Label>Experience Level</Label>
                             <Input
                                 type="text"
@@ -133,7 +119,7 @@ const PostJob = () => {
                             />
                         </div>
                         <div>
-                            <Label>No of Postion</Label>
+                            <Label>No of Position</Label>
                             <Input
                                 type="number"
                                 name="position"
@@ -142,9 +128,46 @@ const PostJob = () => {
                                 className="focus-visible:ring-offset-0 focus-visible:ring-0 my-1"
                             />
                         </div>
-                        {
+                        
+                        
+
+                        {/* Job Type Dropdown */}
+                        <div>
+                            <Label>Job Type</Label>
+                            <Select onValueChange={(value) => selectChangeHandler(value, 'jobType')}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select Job Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value="full-time">Full Time</SelectItem>
+                                        <SelectItem value="part-time">Part Time</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Location Dropdown */}
+                        <div>
+                            <Label>Location</Label>
+                            <Select onValueChange={(value) => selectChangeHandler(value, 'location')}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select Location" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value="dhaka">Dhaka</SelectItem>
+                                        <SelectItem value="chittagong">Chittagong</SelectItem>
+                                        <SelectItem value="rajshahi">Rajshahi</SelectItem>
+                                        <SelectItem value="khulna">Khulna</SelectItem>
+                                        <SelectItem value="sylhet">Sylhet</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {   
                             companies.length > 0 && (
-                                <Select onValueChange={selectChangeHandler}>
+                                <Select onValueChange={(value) => selectChangeHandler(value, 'company')}>
                                     <SelectTrigger className="w-[180px]">
                                         <SelectValue placeholder="Select a Company" />
                                     </SelectTrigger>
@@ -157,12 +180,12 @@ const PostJob = () => {
                                                     )
                                                 })
                                             }
-
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
                             )
                         }
+
                     </div>
                     {
                         loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Post New Job</Button>
@@ -176,4 +199,4 @@ const PostJob = () => {
     )
 }
 
-export default PostJob
+export default PostJob;
