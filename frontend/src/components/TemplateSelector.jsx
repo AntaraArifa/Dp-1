@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setSelectedTemplate } from "../redux/resumeSlice";
 import modernTemplate from "../assets/templates/modern.png";
@@ -7,43 +7,47 @@ import classicTemplate from "../assets/templates/classic.png";
 import creativeTemplate from "../assets/templates/creative.png";
 
 const templates = [
-  {
-    id: 1,
-    name: "Modern Template",
-    description: "A sleek and modern design suitable for most industries.",
-    previewImage: modernTemplate,
-  },
-  {
-    id: 2,
-    name: "Classic Template",
-    description: "A traditional layout perfect for formal job applications.",
-    previewImage: classicTemplate,
-  },
-  {
-    id: 3,
-    name: "Creative Template",
-    description: "An artistic layout for creative roles and portfolios.",
-    previewImage: creativeTemplate,
-  },
+  { id: 1, name: "Modern Template", description: "A sleek and modern design suitable for most industries.", previewImage: modernTemplate },
+  { id: 2, name: "Classic Template", description: "A traditional layout perfect for formal job applications.", previewImage: classicTemplate },
+  { id: 3, name: "Creative Template", description: "An artistic layout for creative roles and portfolios.", previewImage: creativeTemplate },
 ];
 
 const TemplateSelector = () => {
   const [selectedTemplate, setSelectedTemplateState] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const resumeId = location.state?.resumeId;
+
+  if (!resumeId) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
+        <p className="text-red-500 font-semibold mb-4">Error: Resume ID is missing.</p>
+        <button
+          onClick={() => navigate("/resume/edit")}
+          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+        >
+          Go Back to Resume Editor
+        </button>
+      </div>
+    );
+  }
 
   const handleSelectTemplate = (templateId) => {
     setSelectedTemplateState(templateId);
     dispatch(setSelectedTemplate(templateId));
   };
 
-  const handlePreviewTemplate = (templateId) => {
-    navigate(`/resume/templates/${templateId}`);
-  };
-
   const handleContinue = () => {
+    if (!resumeId) {
+      alert("Error: Resume ID is missing. Please go back to create a resume.");
+      navigate("/resume/edit");
+      return;
+    }
+
     if (selectedTemplate) {
-      navigate(`/resume/templates/${selectedTemplate}`);
+      navigate(`/resume/templates/preview/${selectedTemplate}/${resumeId}`);
     } else {
       alert("Please select a template to continue.");
     }
@@ -70,10 +74,7 @@ const TemplateSelector = () => {
               <h3 className="text-xl font-semibold mb-2">{template.name}</h3>
               <p className="text-gray-600 mb-4">{template.description}</p>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePreviewTemplate(template.id);
-                }}
+                onClick={(e) => e.stopPropagation()}
                 className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
               >
                 Preview

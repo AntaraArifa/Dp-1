@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, useParams } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 
 // Job Seeker Components
@@ -22,83 +22,34 @@ import Applicants from "./components/admin/Applicants";
 // Resume Builder Components
 import ResumeEditor from "./components/ResumeEditor";
 import TemplateSelector from "./components/TemplateSelector";
-import TemplatePreview from "./components/TemplatePreview";
-
-// Dynamic Template Preview Component
-const DynamicTemplatePreview = () => {
-  const { templateId, resumeId } = useParams(); // Access dynamic params from the URL
-  return <TemplatePreview selectedTemplate={templateId} resumeId={resumeId} />;
-};
+import DynamicTemplatePreview from "./components/DynamicTemplatePreview";
 
 // Define routes using createBrowserRouter
 const router = createBrowserRouter([
+  // Public Routes
+  { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
+  { path: "/jobs", element: <Jobs /> },
+  { path: "/browse", element: <Browse /> },
+  { path: "/profile", element: <Profile /> },
+  { path: "/job-description/:jobId", element: <JobDescription /> },
+  { path: "/chat", element: <ChatPage /> },
+
+  // Admin Routes
+  { path: "/admin/companies", element: <Companies /> },
+  { path: "/admin/companies/create", element: <CompanyCreate /> },
+  { path: "/admin/companies/setup/:companyId", element: <CompanySetup /> },
+  { path: "/admin/jobs", element: <AdminJobs /> },
+  { path: "/admin/jobs/post", element: <PostJob /> },
+  { path: "/admin/applicants", element: <Applicants /> },
+
+  // Resume Builder Routes
+  { path: "/resume/edit", element: <ResumeEditor /> },
+  { path: "/resume/templates", element: <TemplateSelector /> },
   {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/signup",
-    element: <Signup />,
-  },
-  {
-    path: "/jobs",
-    element: <Jobs />,
-  },
-  {
-    path: "/browse",
-    element: <Browse />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/job-description/:jobId",
-    element: <JobDescription />,
-  },
-  {
-    path: "/chat",
-    element: <ChatPage />,
-  },
-  {
-    path: "/admin/companies",
-    element: <Companies />,
-  },
-  {
-    path: "/admin/companies/create",
-    element: <CompanyCreate />,
-  },
-  {
-    path: "/admin/companies/setup/:companyId",
-    element: <CompanySetup />,
-  },
-  {
-    path: "/admin/jobs",
-    element: <AdminJobs />,
-  },
-  {
-    path: "/admin/jobs/post",
-    element: <PostJob />,
-  },
-  {
-    path: "/admin/applicants",
-    element: <Applicants />,
-  },
-  {
-    path: "/resume/edit",
-    element: <ResumeEditor />,
-  },
-  {
-    path: "/resume/templates",
-    element: <TemplateSelector />, // Replace with the appropriate component
-  },
-  {
-    path: "/resume-builder/template-preview/:templateId/:resumeId",
-    element: <DynamicTemplatePreview />,
+    path: "/resume/templates/preview/:templateId/:resumeId",
+    element: <DynamicTemplatePreview />
   },
 ]);
 
