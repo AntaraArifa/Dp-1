@@ -51,6 +51,9 @@ const Navbar = () => {
               <li className="hover:text-[#F83002] cursor-pointer">
                 <Link to="/admin/jobs">Jobs</Link>
               </li>
+              <li className="hover:text-[#F83002] cursor-pointer">
+                <Link to="/chat">Chat</Link>
+              </li>
             </ul>
           ) : (
             <ul className="no-bullets flex gap-8">
@@ -59,9 +62,6 @@ const Navbar = () => {
               </li>
               <li className="hover:text-[#F83002] cursor-pointer">
                 <Link to="/jobs">Jobs</Link>
-              </li>
-              <li className="hover:text-[#F83002] cursor-pointer">
-                <Link to="/browse">Browse</Link>
               </li>
               <li className="hover:text-[#F83002] cursor-pointer">
                 <Link to="/chat">Chat</Link>
