@@ -10,6 +10,7 @@ import Browse from "./components/Browse";
 import { Profile } from "./components/Profile";
 import JobDescription from "./components/JobDescription";
 import ChatPage from "./components/ChatPage";
+import SkillAssessment from "./components/Skill/SkillAssesment";
 
 // Admin Components
 import Companies from "./components/admin/Companies";
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
   { path: "/profile", element: <Profile /> },
   { path: "/description/:id", element: <JobDescription /> },
   { path: "/chat", element: <ChatPage /> },
+  { path: "/skillAssessment", element: <SkillAssessment /> },
 
   // Admin Routes
   { path: "/admin/companies", element: <Companies /> },
