@@ -7,12 +7,15 @@ const SkillAssessment = () => {
   const navigate = useNavigate();
 
   const quizzes = [
-    { title: "Front End Developer", path: "/quiz/frontend" },
-    { title: "Back End Developer", path: "/quiz/backend" },
-    { title: "Full Stack Developer", path: "/quiz/fullstack" },
-    { title: "Data Scientist", path: "/quiz/datascientist" },
-    { title: "Business Analyst", path: "/quiz/businessanalyst" },
-    { title: "UI/UX Designer", path: "/quiz/uiux" },
+    { title: "Front End Developer", path: "/skillAssessment/quiz/frontend" },
+    { title: "Back End Developer", path: "/skillAssessment/quiz/backend" },
+    { title: "Full Stack Developer", path: "/skillAssessment/quiz/fullstack" },
+    { title: "Data Scientist", path: "/skillAssessment/quiz/datascientist" },
+    {
+      title: "Business Analyst",
+      path: "/skillAssessment/quiz/businessanalyst",
+    },
+    { title: "UI/UX Designer", path: "/skillAssessment/quiz/uiux" },
   ];
 
   return (
@@ -23,9 +26,18 @@ const SkillAssessment = () => {
           Want to assess your skill? Why not try giving a quiz?
         </h1>
         <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
-          Explore a range of skill assessments designed to challenge your knowledge and boost your confidence.
-          Select a role that aligns with your career goals, and let the quiz guide you on your journey to professional growth.
+          Explore a range of skill assessments designed to challenge your
+          knowledge and boost your confidence. Select a role that aligns with
+          your career goals, and let the quiz guide you on your journey to
+          professional growth.
+          <br />
+          <span className="text-red-600 text-xl">
+            You will have 20 multiple choice questions and 20 minutes to answer
+            them. The timer will start the moment you select the quiz you want
+            to attend.
+          </span>
         </p>
+
         <div className="flex flex-col items-center gap-6 mt-6">
           {quizzes.map((quiz) => (
             <div

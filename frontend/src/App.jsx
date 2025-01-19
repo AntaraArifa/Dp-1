@@ -10,7 +10,15 @@ import Browse from "./components/Browse";
 import { Profile } from "./components/Profile";
 import JobDescription from "./components/JobDescription";
 import ChatPage from "./components/ChatPage";
+
+// Skill Assessment Components
 import SkillAssessment from "./components/Skill/SkillAssesment";
+import FrontEndQuiz from "./components/Skill/quiz/FrontEndQuiz";
+import BackEndQuiz from "./components/Skill/quiz/BackEndQuiz";
+import FullStackQuiz from "./components/Skill/quiz/FullStackQuiz";
+import DataScientistQuiz from "./components/Skill/quiz/DataScientistQuiz";
+import BusinessAnalystQuiz from "./components/Skill/quiz/BusinessAnalystQuiz";
+import UiUxQuiz from "./components/Skill/quiz/UiUxQuiz";
 
 // Admin Components
 import Companies from "./components/admin/Companies";
@@ -36,7 +44,36 @@ const router = createBrowserRouter([
   { path: "/profile", element: <Profile /> },
   { path: "/description/:id", element: <JobDescription /> },
   { path: "/chat", element: <ChatPage /> },
-  { path: "/skillAssessment", element: <SkillAssessment /> },
+
+  // Skill Assessment Routes
+  {
+    path: "/skillAssessment",
+    element: <SkillAssessment />
+  },
+  {
+    path: "/skillAssessment/quiz/frontend",
+    element: <FrontEndQuiz />
+  },
+  {
+    path: "/skillAssessment/quiz/backend",
+    element: <BackEndQuiz />
+  },
+  {
+    path: "/skillAssessment/quiz/fullstack",
+    element: <FullStackQuiz />
+  },
+  {
+    path: "/skillAssessment/quiz/datascientist",
+    element: <DataScientistQuiz />
+  },
+  {
+    path: "/skillAssessment/quiz/businessanalyst",
+    element: <BusinessAnalystQuiz />
+  },
+  {
+    path: "/skillAssessment/quiz/uiux",
+    element: <UiUxQuiz />
+  },
 
   // Admin Routes
   { path: "/admin/companies", element: <Companies /> },
