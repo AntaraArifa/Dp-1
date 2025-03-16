@@ -24,18 +24,17 @@ function ResumeEditor() {
 
   // Handle the Generate Summary button click
   const handleGenerateExperience = async () => {
-    if (!formData.experience[0]?.jobTitle) {
-      alert("Please enter a job title first.");
+    if (!formData.experience[0]?.company || !formData.experience[0]?.duration) {
+      alert("Please enter both company and duration first.");
       return;
     }
-
+  
     setLoadingSummary(true);
-    const jobTitle = formData.experience[0]?.jobTitle; // Get job title from form
-    const fetchedExperience = await generateExperience(jobTitle);
-
-    // Log the fetched experience data to see if it's correct
+    const { company, duration } = formData.experience[0]; // Get company and duration from form
+    const fetchedExperience = await generateExperience(company, duration);
+  
     console.log("Fetched Experience Data:", fetchedExperience);
-
+  
     // Ensure fetchedExperience is an array and update the state
     if (Array.isArray(fetchedExperience) && fetchedExperience.length > 0) {
       setSummaries(fetchedExperience); // Store experience data in summaries
@@ -44,7 +43,7 @@ function ResumeEditor() {
     }
     setLoadingSummary(false);
   };
-
+  
 
 
 
@@ -90,13 +89,13 @@ function ResumeEditor() {
   };
 
 
-  const generateExperience = async (jobTitle) => {
+  const generateExperience = async (company, duration) => {
     try {
       const groq = new Groq({
         apiKey: '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',
         dangerouslyAllowBrowser: true,
       });
-
+  
       const response = await groq.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         temperature: 0.5,
@@ -105,7 +104,7 @@ function ResumeEditor() {
           {
             role: "system",
             content:
-              'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
+              'You are an AI assistant that generates a detailed job experience description for resumes. Based on the company and duration, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
               '{\n' +
               '  "experience": [\n' +
               '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
@@ -114,34 +113,30 @@ function ResumeEditor() {
           },
           {
             role: "user",
-            content: `Job Title: ${jobTitle}`,
+            content: `Company: ${company}\nDuration: ${duration}`,
           },
         ],
       });
-
+  
       let aiResponse = response.choices[0]?.message?.content.trim();
       console.log('Raw AI Response:', aiResponse);
-
+  
       if (aiResponse) {
         // Attempt to fix incomplete or malformed JSON
         let fixedResponse = aiResponse;
-
-        // Check if any string ends abruptly or is incomplete
-        // Fix incomplete strings like "Cloud computing platforms ("
-        fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"'); // Fix incomplete entry
-        fixedResponse = fixedResponse.replace(/,\s*$/, ''); // Remove any trailing commas that might break the JSON
-
-        // Try parsing the corrected JSON
-        const jsonMatch = fixedResponse.match(/\{.*\}/s);  // Match everything inside curly braces (JSON object)
-
+        fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"');
+        fixedResponse = fixedResponse.replace(/,\s*$/, '');
+  
+        const jsonMatch = fixedResponse.match(/\{.*\}/s);
+  
         if (jsonMatch && jsonMatch[0]) {
           const rawJson = jsonMatch[0];
           try {
-            const experienceData = JSON.parse(rawJson); // Parse the JSON part
-            return experienceData.experience; // Return the experience array
+            const experienceData = JSON.parse(rawJson);
+            return experienceData.experience;
           } catch (error) {
             console.error('Error parsing JSON:', error);
-            return []; // Return an empty array if JSON parsing fails
+            return [];
           }
         } else {
           throw new Error('No valid JSON found in the AI response');
@@ -154,6 +149,7 @@ function ResumeEditor() {
       return [];
     }
   };
+  
 
 
 
@@ -417,47 +413,55 @@ function ResumeEditor() {
         {/* Display Summaries Below the Form */}
 
 
-        {summaries.map(({ experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] }, index) => (
-          <li key={index} className="mb-4">
+        {summaries.length > 0 && (
+  <div className="mt-6">
+    <h3 className="text-xl font-semibold mb-4">Suggested Experience Details</h3>
+    <ul>
+      {summaries.map(({ experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] }, index) => (
+        <li key={index} className="mb-4">
+          <div>
+            <strong>{experience_level} Experience:</strong>
+            <p><strong>Job Title:</strong> {job_title}</p>
+            <p><strong>Company:</strong> {company}</p>
+            <p><strong>Duration:</strong> {duration}</p>
             <div>
-              <strong>{experience_level} Experience:</strong>
-              <p><strong>Job Title:</strong> {job_title}</p>
-              <p><strong>Company:</strong> {company}</p>
-              <p><strong>Duration:</strong> {duration}</p>
-              <div>
-                <strong>Key Responsibilities:</strong>
-                <ul>
-                  {key_responsibilities.map((resp, idx) => (
-                    <li key={idx}>{resp}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <strong>Achievements:</strong>
-                <ul>
-                  {achievements.map((ach, idx) => (
-                    <li key={idx}>{ach}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <strong>Skills:</strong>
-                <ul>
-                  {skills_required.map((skill, idx) => (
-                    <li key={idx}>{skill}</li>
-                  ))}
-                </ul>
-              </div>
-              {/* Add a button to select this summary */}
-              <button
-                onClick={() => handleSelectExperience({ job_title, company, duration, description: key_responsibilities.join(', '), skills_required })}
-                className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-xl"
-              >
-                Select Experience
-              </button>
+              <strong>Key Responsibilities:</strong>
+              <ul>
+                {key_responsibilities.map((resp, idx) => (
+                  <li key={idx}>{resp}</li>
+                ))}
+              </ul>
             </div>
-          </li>
-        ))}
+            <div>
+              <strong>Achievements:</strong>
+              <ul>
+                {achievements.map((ach, idx) => (
+                  <li key={idx}>{ach}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <strong>Skills Required:</strong>
+              <ul>
+                {skills_required.map((skill, idx) => (
+                  <li key={idx}>{skill}</li>
+                ))}
+              </ul>
+            </div>
+            {/* Add a button to select this summary */}
+            <button
+              onClick={() => handleSelectExperience({ job_title, company, duration, description: key_responsibilities.join(', '), skills_required })}
+              className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-xl"
+            >
+              Select Experience
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
 
 
 
