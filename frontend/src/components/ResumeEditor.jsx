@@ -23,32 +23,30 @@ function ResumeEditor() {
   const [loadingSummary, setLoadingSummary] = useState(false);
 
   // Handle the Generate Summary button click
-  const handleGenerateSummary = async () => {
+  const handleGenerateExperience = async () => {
     if (!formData.experience[0]?.jobTitle) {
       alert("Please enter a job title first.");
       return;
     }
-
+  
     setLoadingSummary(true);
     const jobTitle = formData.experience[0]?.jobTitle; // Get job title from form
-    const fetchedSummaries = await generateSummary(jobTitle);
-    setSummaries(fetchedSummaries);
+    const fetchedExperience = await generateExperience(jobTitle);
+  
+    // Log the fetched experience data to see if it's correct
+    console.log("Fetched Experience Data:", fetchedExperience);
+  
+    // Ensure fetchedExperience is an array and update the state
+    if (Array.isArray(fetchedExperience) && fetchedExperience.length > 0) {
+      setSummaries(fetchedExperience); // Store experience data in summaries
+    } else {
+      console.error("Experience data is invalid", fetchedExperience);
+    }
     setLoadingSummary(false);
   };
-  // Handle changes in form input
-  const handleChange = (e, section, index = null, field = null) => {
-    if (section === "skills" && index !== null) {
-      const updatedSkills = [...formData.skills];
-      updatedSkills[index] = e.target.value;
-      setFormData({ ...formData, skills: updatedSkills });
-    } else if (index !== null && field !== null) {
-      const updatedSection = [...formData[section]];
-      updatedSection[index][field] = e.target.value;
-      setFormData({ ...formData, [section]: updatedSection });
-    } else {
-      setFormData({ ...formData, [section]: e.target.value });
-    }
-  };
+  
+
+
 
   // Add new item to a section (education, experience, skills)
   const addSectionItem = (section) => {
@@ -92,23 +90,27 @@ function ResumeEditor() {
   };
 
 
-  const generateSummary = async (jobTitle) => {
+  const generateExperience = async (jobTitle) => {
     try {
       const groq = new Groq({
-        apiKey: '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', // Directly use your API key here
+        apiKey: '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',
         dangerouslyAllowBrowser: true,
       });
-
+  
       const response = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.3-70b-versatile", 
         temperature: 0.5,
-        max_tokens: 200,
+        max_tokens: 500, 
         messages: [
           {
             role: "system",
             content:
-              'You are an AI assistant that generates professional summaries for resumes. Based on the job title, provide a summary for 3 experience levels: Freshers, Mid-level, and Senior. Output should be in this format:\n' +
-              '{\n  "summaries": [\n    { "experience_level": "Fresher", "summary": "Summary for fresher" },\n    { "experience_level": "Mid Level", "summary": "Summary for mid-level" },\n    { "experience_level": "Senior", "summary": "Summary for senior" }\n  ]\n}',
+              'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
+              '{\n' +
+              '  "experience": [\n' +
+              '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
+              '  ]\n' +
+              '}'
           },
           {
             role: "user",
@@ -116,52 +118,94 @@ function ResumeEditor() {
           },
         ],
       });
-
+  
       let aiResponse = response.choices[0]?.message?.content.trim();
-
-      // Log the raw response string before parsing
       console.log('Raw AI Response:', aiResponse);
-
-      // Check if the response is incomplete (ends abruptly)
+  
       if (aiResponse) {
-        // Check if the string ends with an incomplete "Senior" summary (you can adjust based on your needs)
-        if (aiResponse.includes('Senior', aiResponse.length - 6) && !aiResponse.endsWith('"')) {
-          aiResponse += '"';  // Add the closing quote if it's missing
-        }
-
-        try {
-          const parsedResponse = JSON.parse(aiResponse); // Attempt to parse the response
-          const summaries = parsedResponse.summaries; // Extract summaries from the parsed response
-          return summaries;
-        } catch (parseError) {
-          console.error("Error parsing JSON:", parseError);
-          console.error("Invalid JSON:", aiResponse); // Log the invalid JSON to help identify the issue
-          return [];
+        // Attempt to fix incomplete or malformed JSON
+        let fixedResponse = aiResponse;
+  
+        // Check if any string ends abruptly or is incomplete
+        // Fix incomplete strings like "Cloud computing platforms ("
+        fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"'); // Fix incomplete entry
+        fixedResponse = fixedResponse.replace(/,\s*$/, ''); // Remove any trailing commas that might break the JSON
+  
+        // Try parsing the corrected JSON
+        const jsonMatch = fixedResponse.match(/\{.*\}/s);  // Match everything inside curly braces (JSON object)
+        
+        if (jsonMatch && jsonMatch[0]) {
+          const rawJson = jsonMatch[0];
+          try {
+            const experienceData = JSON.parse(rawJson); // Parse the JSON part
+            return experienceData.experience; // Return the experience array
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+            return []; // Return an empty array if JSON parsing fails
+          }
+        } else {
+          throw new Error('No valid JSON found in the AI response');
         }
       } else {
         throw new Error('Empty AI response');
       }
     } catch (error) {
-      console.error("Error generating summary:", error);
+      console.error("Error generating experience:", error);
       return [];
     }
   };
+  
+  
 
-  const handleSelectSummary = (summary) => {
-    setSelectedSummary(summary);  // Set the selected summary
+  // Function to extract experience details from plain text
+  const extractExperienceDetails = (responseText) => {
+    // Assuming the AI's response is a structured list like the one you've shown
+    const experienceLevels = ["Fresher", "Mid-level", "Senior"];
+    const experienceData = [];
 
-    // Optionally, you can add the selected summary to a specific part of your formData.
-    // For example, if you want to add it to the experience description or a "summary" section:
+    experienceLevels.forEach(level => {
+      const regex = new RegExp(`\\*\\*${level}.*?Skills Required:`, 'gs');
+      const match = responseText.match(regex);
+      if (match) {
+        const experience = match[0];
+        // Extract the key responsibilities, achievements, and skills from the match
+        experienceData.push({
+          experience_level: level,
+          details: experience,
+        });
+      }
+    });
+
+    return experienceData;
+  };
+
+  const handleSelectExperience = (experienceDetail) => {
+    setSelectedExperience(experienceDetail);  // Store the selected experience
+
+    // Optionally, you can add this experience detail to a specific part of your formData.
     setFormData({
       ...formData,
       experience: formData.experience.map((exp, index) => {
-        // Optionally apply this to a particular job experience or create a new field for the summary
-        if (index === 0) { // assuming you want to add it to the first experience entry
-          return { ...exp, description: summary }; // Add summary to the first experience's description
+        if (index === 0) { // Optionally apply to a particular job experience
+          return { ...exp, description: experienceDetail }; // Add experience detail to the first entry
         }
         return exp;
       }),
     });
+  };
+
+  const handleChange = (e, section, index = null, field = null) => {
+    if (section === "skills" && index !== null) {
+      const updatedSkills = [...formData.skills];
+      updatedSkills[index] = e.target.value;
+      setFormData({ ...formData, skills: updatedSkills });
+    } else if (index !== null && field !== null) {
+      const updatedSection = [...formData[section]];
+      updatedSection[index][field] = e.target.value;
+      setFormData({ ...formData, [section]: updatedSection });
+    } else {
+      setFormData({ ...formData, [section]: e.target.value });
+    }
   };
 
   return (
@@ -359,11 +403,12 @@ function ResumeEditor() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="button"
-              onClick={handleGenerateSummary}
+              onClick={handleGenerateExperience}
               className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2"
             >
-              {loadingSummary ? "Generating..." : "Generate Summary"}
+              {loadingSummary ? "Generating..." : "Generate Experience Details"}
             </motion.button>
+
 
 
             {/* Submit Button */}
@@ -380,21 +425,54 @@ function ResumeEditor() {
         </div>
 
         {/* Display Summaries Below the Form */}
+        {/* Display Summaries Below the Form */}
+        
+
         {summaries.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-xl font-semibold mb-4">Suggested Summaries</h3>
-            <ul>
-              {summaries.map((summary, index) => (
-                <li key={index} className="mb-4">
-                  <div>
-                    <strong>{summary.experience_level} Summary:</strong>
-                    <p>{summary.summary}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+  <div className="mt-6">
+    <h3 className="text-xl font-semibold mb-4">Suggested Experience Details</h3>
+    <ul>
+      {summaries.map(({ experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] }, index) => (
+        <li key={index} className="mb-4">
+          <div>
+            <strong>{experience_level} Experience:</strong>
+            <p><strong>Job Title:</strong> {job_title}</p>
+            <p><strong>Company:</strong> {company}</p>
+            <p><strong>Duration:</strong> {duration}</p>
+            <div>
+              <strong>Key Responsibilities:</strong>
+              <ul>
+                {key_responsibilities.map((resp, idx) => (
+                  <li key={idx}>{resp}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <strong>Achievements:</strong>
+              <ul>
+                {achievements.map((ach, idx) => (
+                  <li key={idx}>{ach}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <strong>Skills Required:</strong>
+              <ul>
+                {skills_required.map((skill, idx) => (
+                  <li key={idx}>{skill}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-        )}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
+
+  
+
 
 
         {/* Preview Section */}
