@@ -184,12 +184,20 @@ function ResumeEditor() {
       ...formData,
       experience: formData.experience.map((exp, index) => {
         if (index === 0) { // Apply the selected experience to the first entry of the experience section
-          return { ...exp, jobTitle: experienceDetail.job_title, company: experienceDetail.company, duration: experienceDetail.duration, description: experienceDetail.description };
+          return {
+            ...exp,
+            jobTitle: experienceDetail.job_title,
+            company: experienceDetail.company,
+            duration: experienceDetail.duration,
+            description: experienceDetail.description,
+          };
         }
         return exp;
       }),
+      skills: experienceDetail.skills_required, // Add the skills to the skills section
     });
   };
+
 
   const handleChange = (e, section, index = null, field = null) => {
     if (section === "skills" && index !== null) {
@@ -261,30 +269,14 @@ function ResumeEditor() {
 
             {/* Skills Section */}
             <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Skills</h3>
-              {formData.skills.map((skill, index) => (
-                <div key={index} className="flex items-center mb-4">
-                  <input
-                    type="text"
-                    placeholder="Skill"
-                    value={skill}
-                    onChange={(e) => handleChange(e, "skills", index)}
-                    className="border rounded-lg p-2 w-full"
-                  />
-                  <button
-                    onClick={() => removeSectionItem("skills", index)}
-                    className="bg-red-500 text-white text-xs px-4 py-2 rounded ml-2"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => addSectionItem("skills")}
-                className="bg-black text-white text-sm px-4 py-2 rounded"
-              >
-                Add Skill
-              </button>
+              <h4 className="text-xl font-semibold text-gray-700">Skills</h4>
+              <div className="mt-2 flex flex-wrap gap-3">
+                {formData.skills.map((skill, index) => (
+                  <span key={index} className="bg-gray-200 text-gray-800 rounded-full px-4 py-1 text-sm">
+                    {skill || "Skill"}
+                  </span>
+                ))}
+              </div>
             </div>
 
             {/* Education Section */}
@@ -425,54 +417,48 @@ function ResumeEditor() {
         {/* Display Summaries Below the Form */}
 
 
-        {summaries.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-xl font-semibold mb-4">Suggested Experience Details</h3>
-            <ul>
-              {summaries.map(({ experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] }, index) => (
-                <li key={index} className="mb-4">
-                  <div>
-                    <strong>{experience_level} Experience:</strong>
-                    <p><strong>Job Title:</strong> {job_title}</p>
-                    <p><strong>Company:</strong> {company}</p>
-                    <p><strong>Duration:</strong> {duration}</p>
-                    <div>
-                      <strong>Key Responsibilities:</strong>
-                      <ul>
-                        {key_responsibilities.map((resp, idx) => (
-                          <li key={idx}>{resp}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <strong>Achievements:</strong>
-                      <ul>
-                        {achievements.map((ach, idx) => (
-                          <li key={idx}>{ach}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <strong>Skills:</strong>
-                      <ul>
-                        {skills_required.map((skill, idx) => (
-                          <li key={idx}>{skill}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    {/* Add a button to select this summary */}
-                    <button
-                      onClick={() => handleSelectExperience({ job_title, company, duration, description: key_responsibilities.join(', ') })}
-                      className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-xl"
-                    >
-                      Select Experience
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {summaries.map(({ experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] }, index) => (
+          <li key={index} className="mb-4">
+            <div>
+              <strong>{experience_level} Experience:</strong>
+              <p><strong>Job Title:</strong> {job_title}</p>
+              <p><strong>Company:</strong> {company}</p>
+              <p><strong>Duration:</strong> {duration}</p>
+              <div>
+                <strong>Key Responsibilities:</strong>
+                <ul>
+                  {key_responsibilities.map((resp, idx) => (
+                    <li key={idx}>{resp}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>Achievements:</strong>
+                <ul>
+                  {achievements.map((ach, idx) => (
+                    <li key={idx}>{ach}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>Skills:</strong>
+                <ul>
+                  {skills_required.map((skill, idx) => (
+                    <li key={idx}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+              {/* Add a button to select this summary */}
+              <button
+                onClick={() => handleSelectExperience({ job_title, company, duration, description: key_responsibilities.join(', '), skills_required })}
+                className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-xl"
+              >
+                Select Experience
+              </button>
+            </div>
+          </li>
+        ))}
+
 
 
 
