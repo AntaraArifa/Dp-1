@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { RESUME_API_END_POINT } from "../utils/constant";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, PenSquare, Image as ImageIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import Footer from "../components/shared/Footer";
+import Header from "../components/shared/Navbar";
+import SideButtons from "../components/SideButtons";
+import Groq from "groq-sdk";
+import { jsPDF } from "jspdf";
 
-const ResumeEditor = () => {
-  const navigate = useNavigate();
-
-  // Form data state
+// ResumeEditor Component
+function ResumeEditor() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,10 +18,268 @@ const ResumeEditor = () => {
     experience: [{ jobTitle: "", company: "", duration: "", description: "" }],
     skills: [""],
   });
-
   const [loading, setLoading] = useState(false);
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [summaries, setSummaries] = useState([]); // State to store summaries
+  const [loadingSummary, setLoadingSummary] = useState(false);
 
-  // Input change handler
+  // Handle the Generate Summary button click
+  const handleGenerateExperience = async () => {
+    if (!formData.experience[0]?.company || !formData.experience[0]?.duration) {
+      alert("Please enter both company and duration first.");
+      return;
+    }
+
+    setLoadingSummary(true);
+    const { company, duration } = formData.experience[0]; // Get company and duration from form
+    const fetchedExperience = await generateExperience(company, duration);
+
+    console.log("Fetched Experience Data:", fetchedExperience);
+
+    // Ensure fetchedExperience is an array and update the state
+    if (Array.isArray(fetchedExperience) && fetchedExperience.length > 0) {
+      setSummaries(fetchedExperience); // Store experience data in summaries
+    } else {
+      console.error("Experience data is invalid", fetchedExperience);
+    }
+    setLoadingSummary(false);
+  };
+
+  const generateResumePDF = () => {
+    const doc = new jsPDF();
+    const marginX = 20;
+    const marginY = 20;
+    const lineHeight = 8;
+    const titleFontSize = 24;
+    const sectionFontSize = 16;
+    const contentFontSize = 12;
+    const maxWidth = 170; // Maximum width for text to avoid overflow
+  
+    // Set font for title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(titleFontSize);
+  
+    // Center the name at the top
+    const nameWidth = doc.getTextWidth(formData.name || 'Name');
+    const nameX = (doc.internal.pageSize.width - nameWidth) / 2; // Center the name on the page
+    doc.text(formData.name || 'Name', nameX, marginY);
+  
+    // Add the rest of the personal information (Email, Phone, Address)
+    doc.setFontSize(contentFontSize);
+    doc.setFont("helvetica", "normal");
+  
+    let yOffset = marginY + titleFontSize + lineHeight * 2;
+  
+    // Address and Contact info aligned as in the image (on one line with spacing)
+    const addressLine1 = formData.address || '123 Main St, City, Country';
+    const addressLine2 = formData.address2 || '456 Another St, City, Country'; // Assuming two address fields
+    const phone = formData.phone || '(555) 555-5555';
+    const email = formData.email || 'email@example.com';
+  
+    const addressText = `${addressLine1} · ${addressLine2}`;
+    const contactText = `${phone} · ${email}`;
+    
+    doc.text(addressText, marginX, yOffset);
+    yOffset += lineHeight * 1.5;  // Adjust spacing after the address
+  
+    doc.text(contactText, marginX, yOffset);
+    yOffset += lineHeight * 2; // Add space before the next section
+  
+    // Add Education Section
+    doc.setFontSize(sectionFontSize);
+    doc.setFont("helvetica", "bold");
+    doc.text("Education:", marginX, yOffset);
+    doc.setFontSize(contentFontSize);
+    doc.setFont("helvetica", "normal");
+    yOffset += lineHeight;
+  
+    formData.education.forEach((edu, index) => {
+      doc.text(`${edu.degree} from ${edu.institution}, ${edu.year}`, marginX, yOffset);
+      yOffset += lineHeight;
+    });
+  
+    // Add Experience Section
+    doc.setFontSize(sectionFontSize);
+    doc.setFont("helvetica", "bold");
+    doc.text("Experience:", marginX, yOffset);
+    doc.setFontSize(contentFontSize);
+    doc.setFont("helvetica", "normal");
+    yOffset += lineHeight;
+  
+    formData.experience.forEach((exp, index) => {
+      doc.text(`${exp.jobTitle} at ${exp.company} (${exp.duration})`, marginX, yOffset);
+      yOffset += lineHeight;
+  
+      // Add description with text wrapping
+      const descriptionText = exp.description || 'No description available';
+      doc.setFont("helvetica", "normal");
+      doc.text(descriptionText, marginX, yOffset, { maxWidth: maxWidth });
+      
+      // Calculate how many lines the description occupies
+      const descriptionLines = doc.getTextDimensions(descriptionText, { maxWidth }).h / lineHeight;
+      yOffset += Math.ceil(descriptionLines) * lineHeight; // Adjust yOffset for description
+  
+    });
+  
+    // Add space before Skills Section
+    yOffset += lineHeight;  // Make sure there is enough space before the next section
+  
+    // Add Skills Section
+    doc.setFontSize(sectionFontSize);
+    doc.setFont("helvetica", "bold");
+    doc.text("Skills:", marginX, yOffset);
+    doc.setFontSize(contentFontSize);
+    doc.setFont("helvetica", "normal");
+    yOffset += lineHeight;
+  
+    formData.skills.forEach((skill, index) => {
+      doc.text(`• ${skill}`, marginX, yOffset);
+      yOffset += lineHeight;
+    });
+  
+    // If there is a profile image, add it (Positioning it properly in the PDF)
+    if (mediaPreview) {
+      const imageWidth = 40;
+      const imageHeight = 40;
+      doc.addImage(mediaPreview, "JPEG", 150, marginY, imageWidth, imageHeight);
+      yOffset += imageHeight + lineHeight;
+    }
+  
+    // Add Footer for better structure (Optional)
+    doc.setFontSize(10);
+    doc.text("Generated by Resume Builder", marginX, yOffset);
+  
+    // Save the PDF to download
+    doc.save("resume.pdf");
+};
+
+
+  
+  // Add new item to a section (education, experience, skills)
+const addSectionItem = (section) => {
+    const newItem =
+      section === "education"
+        ? { degree: "", institution: "", year: "" }
+        : section === "experience"
+          ? { jobTitle: "", company: "", duration: "", description: "" }
+          : section === "skills"
+            ? ""
+            : null;
+
+    setFormData({ ...formData, [section]: [...formData[section], newItem] });
+  };
+
+  // Remove an item from a section
+  const removeSectionItem = (section, index) => {
+    const updatedSection = formData[section].filter((_, i) => i !== index);
+    setFormData({ ...formData, [section]: updatedSection });
+  };
+
+  // Handle file changes (for profile or other media)
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setMediaPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Submit the form data
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Handle submission (API request or other actions)
+    // After submission, reset the form or display success
+    setLoading(false);
+  };
+
+
+  const generateExperience = async (company, duration) => {
+    try {
+      const groq = new Groq({
+        apiKey: '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',
+        dangerouslyAllowBrowser: true,
+      });
+
+      const response = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.5,
+        max_tokens: 500,
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, company and duration, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
+              '{\n' +
+              '  "experience": [\n' +
+              '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
+              '  ]\n' +
+              '}'
+          },
+          {
+            role: "user",
+            content: `Company: ${company}\nDuration: ${duration}`,
+          },
+        ],
+      });
+
+      let aiResponse = response.choices[0]?.message?.content.trim();
+      console.log('Raw AI Response:', aiResponse);
+
+      if (aiResponse) {
+        // Attempt to fix incomplete or malformed JSON
+        let fixedResponse = aiResponse;
+        fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"');
+        fixedResponse = fixedResponse.replace(/,\s*$/, '');
+
+        const jsonMatch = fixedResponse.match(/\{.*\}/s);
+
+        if (jsonMatch && jsonMatch[0]) {
+          const rawJson = jsonMatch[0];
+          try {
+            const experienceData = JSON.parse(rawJson);
+            return experienceData.experience;
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+            return [];
+          }
+        } else {
+          throw new Error('No valid JSON found in the AI response');
+        }
+      } else {
+        throw new Error('Empty AI response');
+      }
+    } catch (error) {
+      console.error("Error generating experience:", error);
+      return [];
+    }
+  };
+
+
+  const handleSelectExperience = (experienceDetail) => {
+    setFormData({
+      ...formData,
+      experience: formData.experience.map((exp, index) => {
+        if (index === 0) { // Apply the selected experience to the first entry of the experience section
+          return {
+            ...exp,
+            jobTitle: experienceDetail.job_title,
+            company: experienceDetail.company,
+            duration: experienceDetail.duration,
+            description: experienceDetail.description,
+          };
+        }
+        return exp;
+      }),
+      skills: experienceDetail.skills_required, // Add the skills to the skills section
+    });
+  };
+
+
   const handleChange = (e, section, index = null, field = null) => {
     if (section === "skills" && index !== null) {
       const updatedSkills = [...formData.skills];
@@ -34,225 +294,331 @@ const ResumeEditor = () => {
     }
   };
 
-  // Add a new item to a section
-  const addSectionItem = (section) => {
-    const newItem =
-      section === "education"
-        ? { degree: "", institution: "", year: "" }
-        : section === "experience"
-        ? { jobTitle: "", company: "", duration: "", description: "" }
-        : section === "skills"
-        ? ""
-        : null;
-
-    setFormData({ ...formData, [section]: [...formData[section], newItem] });
-  };
-
-  // Remove an item from a section
-  const removeSectionItem = (section, index) => {
-    const updatedSection = formData[section].filter((_, i) => i !== index);
-    setFormData({ ...formData, [section]: updatedSection });
-  };
-
-  // Submit handler
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.post(`${RESUME_API_END_POINT}`, formData);
-      const { resume } = response.data;
-
-      if (resume && resume._id) {
-        console.log("Resume Created with ID:", resume._id);
-        // Navigate to Template Selector with resumeId
-        navigate(`/resume/templates`, { state: { resumeId: resume._id } });
-      } else {
-        console.error("Unexpected response format. Resume ID missing.");
-        alert("Failed to create resume. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error creating resume:", error.message);
-      alert("An error occurred while creating the resume. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="resume-editor bg-gray-100 min-h-screen p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">Resume Builder</h2>
+    <div className="w-full bg-gray-100 min-h-screen">
+      {/* Navbar */}
+      <Header />
 
-        {/* Personal Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Name</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleChange(e, "name")}
-              className="border rounded-lg p-3 w-full"
-              placeholder="Enter your name"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange(e, "email")}
-              className="border rounded-lg p-3 w-full"
-              placeholder="Enter your email"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Phone</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleChange(e, "phone")}
-              className="border rounded-lg p-3 w-full"
-              placeholder="Enter your phone number"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Address</label>
-            <textarea
-              value={formData.address}
-              onChange={(e) => handleChange(e, "address")}
-              className="border rounded-lg p-3 w-full"
-              placeholder="Enter your address"
-            />
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        <div>
+          {/* Resume Form Section */}
+          <h2 className="text-3xl font-bold text-gray-800 mb-8">Resume Builder</h2>
 
-        {/* Education Section */}
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-4">Education</h3>
-          {formData.education.map((edu, index) => (
-            <div key={index} className="mb-4">
-              <input
-                type="text"
-                placeholder="Degree"
-                value={edu.degree}
-                onChange={(e) => handleChange(e, "education", index, "degree")}
-                className="border rounded-lg p-2 mr-2"
-              />
-              <input
-                type="text"
-                placeholder="Institution"
-                value={edu.institution}
-                onChange={(e) => handleChange(e, "education", index, "institution")}
-                className="border rounded-lg p-2 mr-2"
-              />
-              <input
-                type="text"
-                placeholder="Year"
-                value={edu.year}
-                onChange={(e) => handleChange(e, "education", index, "year")}
-                className="border rounded-lg p-2"
-              />
+          <form onSubmit={handleSubmit}>
+            {/* Personal Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => handleChange(e, 'name')}
+                  className="border rounded-lg p-3 w-full"
+                  placeholder="Enter your name"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange(e, 'email')}
+                  className="border rounded-lg p-3 w-full"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Phone</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleChange(e, 'phone')}
+                  className="border rounded-lg p-3 w-full"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Address</label>
+                <textarea
+                  value={formData.address}
+                  onChange={(e) => handleChange(e, 'address')}
+                  className="border rounded-lg p-3 w-full"
+                  placeholder="Enter your address"
+                />
+              </div>
+            </div>
+
+            {/* Skills Section */}
+            <div className="mb-6">
+              <h4 className="text-xl font-semibold text-gray-700">Skills</h4>
+              <div className="mt-2 flex flex-wrap gap-3">
+                {formData.skills.map((skill, index) => (
+                  <span key={index} className="bg-gray-200 text-gray-800 rounded-full px-4 py-1 text-sm">
+                    {skill || 'Skill'}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Education Section */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-4">Education</h3>
+              {formData.education.map((edu, index) => (
+                <div key={index} className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Degree"
+                    value={edu.degree}
+                    onChange={(e) => handleChange(e, 'education', index, 'degree')}
+                    className="border rounded-lg p-2 mr-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Institution"
+                    value={edu.institution}
+                    onChange={(e) => handleChange(e, 'education', index, 'institution')}
+                    className="border rounded-lg p-2 mr-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Year"
+                    value={edu.year}
+                    onChange={(e) => handleChange(e, 'education', index, 'year')}
+                    className="border rounded-lg p-2"
+                  />
+                  <button
+                    onClick={() => removeSectionItem('education', index)}
+                    className="bg-red-500 text-white text-xs px-4 py-2 rounded ml-2"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
               <button
-                onClick={() => removeSectionItem("education", index)}
-                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-700 ml-2"
+                onClick={() => addSectionItem('education')}
+                className="bg-black text-white text-sm px-4 py-2 rounded"
               >
-                Remove
+                Add Education
               </button>
             </div>
-          ))}
-          <button
-            onClick={() => addSectionItem("education")}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Add Education
-          </button>
-        </div>
 
-        {/* Experience Section */}
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-4">Experience</h3>
-          {formData.experience.map((exp, index) => (
-            <div key={index} className="mb-4">
-              <input
-                type="text"
-                placeholder="Job Title"
-                value={exp.jobTitle}
-                onChange={(e) => handleChange(e, "experience", index, "jobTitle")}
-                className="border rounded-lg p-2 mr-2"
-              />
-              <input
-                type="text"
-                placeholder="Company"
-                value={exp.company}
-                onChange={(e) => handleChange(e, "experience", index, "company")}
-                className="border rounded-lg p-2 mr-2"
-              />
-              <input
-                type="text"
-                placeholder="Duration"
-                value={exp.duration}
-                onChange={(e) => handleChange(e, "experience", index, "duration")}
-                className="border rounded-lg p-2"
-              />
-              <textarea
-                placeholder="Description"
-                value={exp.description}
-                onChange={(e) => handleChange(e, "experience", index, "description")}
-                className="border rounded-lg p-2 w-full"
-              />
+            {/* Experience Section */}
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-4">Experience</h3>
+              {formData.experience.map((exp, index) => (
+                <div key={index} className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Job Title"
+                    value={exp.jobTitle}
+                    onChange={(e) => handleChange(e, 'experience', index, 'jobTitle')}
+                    className="border rounded-lg p-2 mr-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Company"
+                    value={exp.company}
+                    onChange={(e) => handleChange(e, 'experience', index, 'company')}
+                    className="border rounded-lg p-2 mr-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Duration"
+                    value={exp.duration}
+                    onChange={(e) => handleChange(e, 'experience', index, 'duration')}
+                    className="border rounded-lg p-2"
+                  />
+                  <textarea
+                    placeholder="Description"
+                    value={exp.description}
+                    onChange={(e) => handleChange(e, 'experience', index, 'description')}
+                    className="border rounded-lg p-2 w-full"
+                  />
+                  <button
+                    onClick={() => removeSectionItem('experience', index)}
+                    className="bg-red-500 text-white text-xs px-4 py-2 rounded ml-2"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
               <button
-                onClick={() => removeSectionItem("experience", index)}
-                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-700 ml-2"
+                onClick={() => addSectionItem('experience')}
+                className="bg-black text-white text-sm px-4 py-2 rounded"
               >
-                Remove
+                Add Experience
               </button>
             </div>
-          ))}
-          <button
-            onClick={() => addSectionItem("experience")}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Add Experience
-          </button>
-        </div>
 
-        {/* Skills Section */}
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-4">Skills</h3>
-          {formData.skills.map((skill, index) => (
-            <div key={index} className="flex items-center mb-4">
+            {/* Media Upload (Profile Image or other media) */}
+            <div className="mb-6">
+              <label className="block text-gray-700 font-medium mb-2">Profile Picture</label>
               <input
-                type="text"
-                placeholder="Skill"
-                value={skill}
-                onChange={(e) => handleChange(e, "skills", index)}
-                className="border rounded-lg p-2 w-full"
+                type="file"
+                onChange={handleFileChange}
+                className="border rounded-lg p-3 w-full"
               />
-              <button
-                onClick={() => removeSectionItem("skills", index)}
-                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-700 ml-2"
-              >
-                Remove
-              </button>
+              {mediaPreview && (
+                <img
+                  src={mediaPreview}
+                  alt="Profile Preview"
+                  className="mt-4 w-32 h-32 rounded-full object-cover"
+                />
+              )}
             </div>
-          ))}
-          <button
-            onClick={() => addSectionItem("skills")}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Add Skill
-          </button>
+
+            {/* Generate Summary Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={handleGenerateExperience}
+              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              {loadingSummary ? 'Generating...' : 'Generate Experience Details'}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={generateResumePDF} // Trigger the PDF generation
+              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2 mb-4"
+            >
+              <PenSquare className="w-5 h-5" />
+              {loading ? 'Saving...' : 'Create Resume'}
+            </motion.button>
+
+            {/* Display Summaries Below the Form */}
+            {summaries.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-4">Suggested Experience Details</h3>
+                <ul>
+                  {summaries.map(
+                    (
+                      { experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] },
+                      index
+                    ) => (
+                      <li key={index} className="mb-4">
+                        <div>
+                          <strong>{experience_level} Experience:</strong>
+                          <p><strong>Job Title:</strong> {job_title}</p>
+                          <p><strong>Company:</strong> {company}</p>
+                          <p><strong>Duration:</strong> {duration}</p>
+                          <div>
+                            <strong>Key Responsibilities:</strong>
+                            <ul>
+                              {key_responsibilities.map((resp, idx) => (
+                                <li key={idx}>{resp}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Achievements:</strong>
+                            <ul>
+                              {achievements.map((ach, idx) => (
+                                <li key={idx}>{ach}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Skills Required:</strong>
+                            <ul>
+                              {skills_required.map((skill, idx) => (
+                                <li key={idx}>{skill}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <button
+                            onClick={() =>
+                              handleSelectExperience({
+                                job_title,
+                                company,
+                                duration,
+                                description: key_responsibilities.join(', '),
+                                skills_required,
+                              })
+                            }
+                            className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-xl"
+                          >
+                            Select Experience
+                          </button>
+                        </div>
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+            )}
+          </form>
         </div>
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className={`${
-            loading ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
-          } text-white px-6 py-3 rounded-lg w-full text-lg`}
-        >
-          {loading ? "Creating Resume..." : "Create Resume"}
-        </button>
+        {/* Preview Section */}
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+          {/* Resume Header */}
+          <div className="text-center mb-8">
+            <h3 className="text-3xl font-extrabold text-gray-800">{formData.name || 'Name'}</h3>
+            <div className="mt-2 text-lg text-gray-600">
+              <p>{formData.email || 'email@example.com'}</p>
+              <p>{formData.phone || '(555) 555-5555'}</p>
+              <p>{formData.address || '123 Main St, City, Country'}</p>
+            </div>
+          </div>
+
+          {/* Experience Section */}
+          <div className="mb-6">
+            <h4 className="text-xl font-semibold text-gray-700">Experience</h4>
+            <div className="space-y-4 mt-2">
+              {formData.experience.map((exp, index) => (
+                <div key={index} className="border-b pb-4">
+                  <h5 className="text-lg font-semibold text-gray-800">
+                    {exp.jobTitle || 'Job Title'} at {exp.company || 'Company Name'}
+                  </h5>
+                  <p className="text-sm text-gray-600">{exp.duration || 'January 2020 - Present'}</p>
+                  <p className="mt-2 text-gray-700">{exp.description || 'Job description goes here.'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Education Section */}
+          <div className="mb-6">
+            <h4 className="text-xl font-semibold text-gray-700">Education</h4>
+            <div className="space-y-4 mt-2">
+              {formData.education.map((edu, index) => (
+                <div key={index} className="border-b pb-4">
+                  <h5 className="text-lg font-semibold text-gray-800">
+                    {edu.degree || 'Degree'} from {edu.institution || 'Institution Name'}
+                  </h5>
+                  <p className="text-sm text-gray-600">{edu.year || 'Graduation Year'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skills Section */}
+          <div className="mb-6">
+            <h4 className="text-xl font-semibold text-gray-700">Skills</h4>
+            <div className="mt-2 flex flex-wrap gap-3">
+              {formData.skills.map((skill, index) => (
+                <span key={index} className="bg-gray-200 text-gray-800 rounded-full px-4 py-1 text-sm">
+                  {skill || 'Skill'}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Profile Picture Section */}
+          {mediaPreview && (
+            <div className="flex justify-center mt-6">
+              <img
+                src={mediaPreview}
+                alt="Profile Preview"
+                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
