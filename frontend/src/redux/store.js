@@ -18,6 +18,7 @@ import applicationSlice from "./applicationSlice";
 import chatSlice from "./chatSlice";
 import messageSlice from "./messageSlice";
 import resumeSlice from './resumeSlice';  // Import resumeSlice
+import notificationSlice from './notificationSlice'; 
 
 const persistConfig = {
     key: 'root',
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
     chat: chatSlice,
     message: messageSlice,
     resume: resumeSlice,  // Add resume slice to root reducer
+    notification: notificationSlice,  
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
