@@ -112,6 +112,19 @@ export const updateStatus = async (req,res) => {
                 success:false
             })
         };
+        if (application.status === "accepted" && status.toLowerCase() === "accepted") {
+            return res.status(400).json({
+                message: "This application has already been accepted.",
+                success: false
+            });
+        }
+        if (status.toLowerCase() === "rejected") {
+            await Application.deleteOne({ _id: applicationId }); // Delete application from DB
+            return res.status(200).json({
+                message: "Application rejected and removed successfully.",
+                success: true
+            });
+        }
         
         application.status = status.toLowerCase();
         await application.save();

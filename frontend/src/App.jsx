@@ -32,6 +32,8 @@ import Applicants from "./components/admin/Applicants";
 import ResumeEditor from "./components/ResumeEditor";
 import TemplateSelector from "./components/TemplateSelector";
 import DynamicTemplatePreview from "./components/DynamicTemplatePreview";
+import { MeetingPage } from "./components/admin/MeetingPage";
+
 
 // Define routes using createBrowserRouter
 const router = createBrowserRouter([
@@ -90,6 +92,14 @@ const router = createBrowserRouter([
     path: "/resume/templates/preview/:templateId/:resumeId",
     element: <DynamicTemplatePreview />
   },
+  {
+    path:"/meeting/:roomId",
+    element:<MeetingPage/>
+  },
+  /*{
+    path:"/interview-meeting/:applicantId",
+    element:<InterviewAndMeetingForm />
+  }*/
 ]);
 
 // Main App Component

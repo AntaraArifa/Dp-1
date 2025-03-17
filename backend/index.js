@@ -9,6 +9,7 @@ import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 import chatRoute from "./routes/chat.route.js";
 import resumeRoute from "./routes/resume.routes.js"; // Import the Resume route
+import notificationRoute from "./routes/notification.route.js"; 
 
 // Load environment variables
 dotenv.config();
@@ -30,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS configuration
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+const allowedOrigins = ["http://localhost:5173","http://localhost:5174","http://localhost:3000"];
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -51,6 +52,7 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/chat", chatRoute);
 app.use("/api/v1/resumes", resumeRoute); // Register the Resume route
+app.use("/api/v1/notification", notificationRoute);
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
