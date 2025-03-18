@@ -9,6 +9,7 @@ import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 import chatRoute from "./routes/chat.route.js";
 import resumeRoute from "./routes/resume.routes.js";
+import notificationRoutes from "./routes/notification.route.js"
 
 // Load environment variables
 dotenv.config();
@@ -57,6 +58,7 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/chat", chatRoute);
 app.use("/api/v1/resumes", resumeRoute);
+app.use("/api/v1/notification",notificationRoutes);
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
