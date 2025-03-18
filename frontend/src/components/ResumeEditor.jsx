@@ -64,9 +64,9 @@ function ResumeEditor() {
 
     // Add profile image if available
     if (mediaPreview) {
-        const imageWidth = 40;
-        const imageHeight = 40;
-        doc.addImage(mediaPreview, "JPEG", marginX, currentY, imageWidth, imageHeight);
+      const imageWidth = 40;
+      const imageHeight = 40;
+      doc.addImage(mediaPreview, "JPEG", marginX, currentY, imageWidth, imageHeight);
     }
 
     // Calculate name position dynamically based on the image
@@ -104,8 +104,8 @@ function ResumeEditor() {
     doc.setFont("helvetica", "normal");
 
     formData.education.forEach((edu) => {
-        doc.text(`${edu.degree} from ${edu.institution}, ${edu.year}`, marginX, currentY);
-        currentY += lineHeight;
+      doc.text(`${edu.degree} from ${edu.institution}, ${edu.year}`, marginX, currentY);
+      currentY += lineHeight;
     });
 
     currentY += lineHeight; // Space before next section
@@ -120,14 +120,14 @@ function ResumeEditor() {
     doc.setFont("helvetica", "normal");
 
     formData.experience.forEach((exp) => {
-        doc.text(`${exp.jobTitle} at ${exp.company} (${exp.duration})`, marginX, currentY);
-        currentY += lineHeight;
+      doc.text(`${exp.jobTitle} at ${exp.company} (${exp.duration})`, marginX, currentY);
+      currentY += lineHeight;
 
-        const descriptionText = exp.description || 'No description available';
-        doc.text(descriptionText, marginX, currentY, { maxWidth });
+      const descriptionText = exp.description || 'No description available';
+      doc.text(descriptionText, marginX, currentY, { maxWidth });
 
-        const descriptionLines = doc.getTextDimensions(descriptionText, { maxWidth }).h / lineHeight;
-        currentY += Math.ceil(descriptionLines) * lineHeight; // Adjust for description height
+      const descriptionLines = doc.getTextDimensions(descriptionText, { maxWidth }).h / lineHeight;
+      currentY += Math.ceil(descriptionLines) * lineHeight; // Adjust for description height
     });
 
     currentY += lineHeight; // Space before next section
@@ -142,8 +142,8 @@ function ResumeEditor() {
     doc.setFont("helvetica", "normal");
 
     formData.skills.forEach((skill) => {
-        doc.text(`• ${skill}`, marginX, currentY);
-        currentY += lineHeight;
+      doc.text(`• ${skill}`, marginX, currentY);
+      currentY += lineHeight;
     });
 
     // Footer for better structure
@@ -152,9 +152,9 @@ function ResumeEditor() {
 
     // Save the PDF
     doc.save("resume.pdf");
-};
+  };
 
- // Add new item to a section (education, experience, skills)
+  // Add new item to a section (education, experience, skills)
   const addSectionItem = (section) => {
     const newItem =
       section === "education"
@@ -363,90 +363,101 @@ function ResumeEditor() {
               <h3 className="text-xl font-semibold mb-4">Education</h3>
               {formData.education.map((edu, index) => (
                 <div key={index} className="mb-4">
-                  <input
-                    type="text"
-                    placeholder="Degree"
-                    value={edu.degree}
-                    onChange={(e) => handleChange(e, 'education', index, 'degree')}
-                    className="border rounded-lg p-2 mr-2"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Institution"
-                    value={edu.institution}
-                    onChange={(e) => handleChange(e, 'education', index, 'institution')}
-                    className="border rounded-lg p-2 mr-2"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Year"
-                    value={edu.year}
-                    onChange={(e) => handleChange(e, 'education', index, 'year')}
-                    className="border rounded-lg p-2"
-                  />
-                  <button
-                    onClick={() => removeSectionItem('education', index)}
-                    className="bg-red-500 text-white text-xs px-4 py-2 rounded ml-2"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      placeholder="Degree"
+                      value={edu.degree}
+                      onChange={(e) => handleChange(e, 'education', index, 'degree')}
+                      className="border rounded-lg p-2 flex-grow"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Institution"
+                      value={edu.institution}
+                      onChange={(e) => handleChange(e, 'education', index, 'institution')}
+                      className="border rounded-lg p-2 flex-grow"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Year"
+                      value={edu.year}
+                      onChange={(e) => handleChange(e, 'education', index, 'year')}
+                      className="border rounded-lg p-2"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <button
+                      onClick={() => addSectionItem('education')}
+                      className="bg-black text-white text-sm px-4 py-2 rounded"
+                    >
+                      Add Education
+                    </button>
+                    <button
+                      onClick={() => removeSectionItem('education', index)}
+                      className="bg-red-500 text-white text-sm px-4 py-2 rounded"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ))}
-              <button
-                onClick={() => addSectionItem('education')}
-                className="bg-black text-white text-sm px-4 py-2 rounded"
-              >
-                Add Education
-              </button>
             </div>
+
+
 
             {/* Experience Section */}
             <div className="mb-6">
               <h3 className="text-xl font-semibold mb-4">Experience</h3>
               {formData.experience.map((exp, index) => (
                 <div key={index} className="mb-4">
-                  <input
-                    type="text"
-                    placeholder="Job Title"
-                    value={exp.jobTitle}
-                    onChange={(e) => handleChange(e, 'experience', index, 'jobTitle')}
-                    className="border rounded-lg p-2 mr-2"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Company"
-                    value={exp.company}
-                    onChange={(e) => handleChange(e, 'experience', index, 'company')}
-                    className="border rounded-lg p-2 mr-2"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Duration"
-                    value={exp.duration}
-                    onChange={(e) => handleChange(e, 'experience', index, 'duration')}
-                    className="border rounded-lg p-2"
-                  />
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      placeholder="Job Title"
+                      value={exp.jobTitle}
+                      onChange={(e) => handleChange(e, 'experience', index, 'jobTitle')}
+                      className="border rounded-lg p-2 flex-grow"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Company"
+                      value={exp.company}
+                      onChange={(e) => handleChange(e, 'experience', index, 'company')}
+                      className="border rounded-lg p-2 flex-grow"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Duration"
+                      value={exp.duration}
+                      onChange={(e) => handleChange(e, 'experience', index, 'duration')}
+                      className="border rounded-lg p-2"
+                    />
+                  </div>
                   <textarea
                     placeholder="Description"
                     value={exp.description}
                     onChange={(e) => handleChange(e, 'experience', index, 'description')}
-                    className="border rounded-lg p-2 w-full"
+                    className="border rounded-lg p-2 w-full mt-2"
                   />
-                  <button
-                    onClick={() => removeSectionItem('experience', index)}
-                    className="bg-red-500 text-white text-sm px-4 py-2 rounded ml-2"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex justify-between items-center mt-2">
+                    <button
+                      onClick={() => addSectionItem('experience')}
+                      className="bg-black text-white text-sm px-4 py-2 rounded"
+                    >
+                      Add Experience
+                    </button>
+                    <button
+                      onClick={() => removeSectionItem('experience', index)}
+                      className="bg-red-500 text-white text-sm px-4 py-2 rounded"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               ))}
-              <button
-                onClick={() => addSectionItem('experience')}
-                className="bg-black text-white text-sm px-4 py-2 rounded"
-              >
-                Add Experience
-              </button>
             </div>
+
 
             {/* Media Upload (Profile Image or other media) */}
             <div className="mb-6">
