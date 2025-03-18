@@ -7,10 +7,15 @@ import { useNavigate } from "react-router-dom";
 const CreateMeetingDialog = ({ open, setOpen, applicantId }) => {
     const navigate=useNavigate();
   const [value, setValue] = useState();
-  const handleJoinRoom = useCallback (() => {
-      navigate(`/meeting/${value}`);
-  },[navigate,value]
-)
+  const handleJoinRoom = useCallback(() => {
+    if (!value) {
+      alert("Please enter a meeting code");
+      return;
+    }
+    
+    // Open meeting link in a new tab
+    window.open(`/meeting/${value}`, "_blank"); 
+  }, [value]);
 
   return (
     <div className="absolute inset-0 bg-gray-700 bg-opacity-50 flex items-center justify-center">

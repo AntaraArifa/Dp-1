@@ -84,37 +84,29 @@ export const postJob = async (req, res) => {
 export const getAllJobs = async (req, res) => {
     try {
         const keyword = req.query.keyword || "";
-
-        // Create a regular expression to search for jobs matching the keyword
-        const regex = new RegExp(keyword, "i");  // "i" for case-insensitive search
-
-        // Fetch jobs from the database where title or description matches the keyword
-        const jobs = await Job.find({
+        const query = {
             $or: [
-                { title: { $regex: regex } }, // Search in job titles
-                { description: { $regex: regex } } // Search in job descriptions
+                { title: { $regex: keyword, $options: "i" } },
+                { description: { $regex: keyword, $options: "i" } },
             ]
-        });
-
-        if (!jobs || jobs.length === 0) {
+        };
+        const jobs = await Job.find(query).populate({
+            path: "company"
+        }).sort({ createdAt: -1 });
+        if (!jobs) {
             return res.status(404).json({
-                message: "No jobs found matching your query.",
+                message: "Jobs not found.",
                 success: false
-            });
-        }
-
+            })
+        };
         return res.status(200).json({
             jobs,
             success: true
-        });
+        })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            message: "Error fetching jobs.",
-            success: false
-        });
     }
-};
+}
 
 // Get job by ID
 export const getJobById = async (req, res) => {
