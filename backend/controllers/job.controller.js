@@ -91,7 +91,8 @@ export const getAllJobs = async (req, res) => {
             ]
         };
         const jobs = await Job.find(query).populate({
-            path: "company"
+            path: "company",
+            select: "name logo"
         }).sort({ createdAt: -1 });
         if (!jobs) {
             return res.status(404).json({
