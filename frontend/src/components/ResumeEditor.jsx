@@ -26,14 +26,14 @@ function ResumeEditor() {
 
   // Handle the Generate Summary button click
   const handleGenerateExperience = async () => {
-    if (!formData.experience[0]?.company || !formData.experience[0]?.duration) {
-      alert("Please enter both company and duration first.");
+    if (!formData.experience[0]?.company || !formData.experience[0]?.duration || !formData.experience[0]?.jobTitle || !formData.experience[0]?.description) {
+      alert("Please enter company, duration, job title, and description first.");
       return;
     }
 
     setLoadingSummary(true);
-    const { company, duration } = formData.experience[0]; // Get company and duration from form
-    const fetchedExperience = await generateExperience(company, duration);
+    const { company, duration, jobTitle, description } = formData.experience[0]; // Get company, duration, jobTitle, and description from form
+    const fetchedExperience = await generateExperience(company, duration, jobTitle, description);
 
     console.log("Fetched Experience Data:", fetchedExperience);
 
@@ -44,7 +44,7 @@ function ResumeEditor() {
       console.error("Experience data is invalid", fetchedExperience);
     }
     setLoadingSummary(false);
-  };
+};
 
   const generateResumePDF = () => {
     const doc = new jsPDF();
@@ -196,66 +196,65 @@ function ResumeEditor() {
   };
 
 
-  const generateExperience = async (company, duration) => {
+  const generateExperience = async (company, duration, jobTitle, description) => {
     try {
-      const groq = new Groq({
-        apiKey: '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',
-        dangerouslyAllowBrowser: true,
-      });
+        const groq = new Groq({
+            apiKey: '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',
+            dangerouslyAllowBrowser: true,
+        });
 
-      const response = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        temperature: 0.5,
-        max_tokens: 500,
-        messages: [
-          {
-            role: "system",
-            content:
-              'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, company and duration, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
-              '{\n' +
-              '  "experience": [\n' +
-              '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
-              '  ]\n' +
-              '}'
-          },
-          {
-            role: "user",
-            content: `Company: ${company}\nDuration: ${duration}`,
-          },
-        ],
-      });
+        const response = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.5,
+            max_tokens: 500,
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, company, duration, and job description, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
+                        '{\n' +
+                        '  "experience": [\n' +
+                        '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
+                        '  ]\n' +
+                        '}'
+                },
+                {
+                    role: "user",
+                    content: `Company: ${company}\nDuration: ${duration}\nJob Title: ${jobTitle}\nDescription: ${description}`,
+                },
+            ],
+        });
 
-      let aiResponse = response.choices[0]?.message?.content.trim();
-      console.log('Raw AI Response:', aiResponse);
+        let aiResponse = response.choices[0]?.message?.content.trim();
+        console.log('Raw AI Response:', aiResponse);
 
-      if (aiResponse) {
-        // Attempt to fix incomplete or malformed JSON
-        let fixedResponse = aiResponse;
-        fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"');
-        fixedResponse = fixedResponse.replace(/,\s*$/, '');
+        if (aiResponse) {
+            let fixedResponse = aiResponse;
+            fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"');
+            fixedResponse = fixedResponse.replace(/,\s*$/, '');
 
-        const jsonMatch = fixedResponse.match(/\{.*\}/s);
+            const jsonMatch = fixedResponse.match(/\{.*\}/s);
 
-        if (jsonMatch && jsonMatch[0]) {
-          const rawJson = jsonMatch[0];
-          try {
-            const experienceData = JSON.parse(rawJson);
-            return experienceData.experience;
-          } catch (error) {
-            console.error('Error parsing JSON:', error);
-            return [];
-          }
+            if (jsonMatch && jsonMatch[0]) {
+                const rawJson = jsonMatch[0];
+                try {
+                    const experienceData = JSON.parse(rawJson);
+                    return experienceData.experience;
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    return [];
+                }
+            } else {
+                throw new Error('No valid JSON found in the AI response');
+            }
         } else {
-          throw new Error('No valid JSON found in the AI response');
+            throw new Error('Empty AI response');
         }
-      } else {
-        throw new Error('Empty AI response');
-      }
     } catch (error) {
-      console.error("Error generating experience:", error);
-      return [];
+        console.error("Error generating experience:", error);
+        return [];
     }
-  };
+};
 
 
   const handleSelectExperience = (experienceDetail) => {
