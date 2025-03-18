@@ -54,110 +54,108 @@ function ResumeEditor() {
     const titleFontSize = 24;
     const sectionFontSize = 16;
     const contentFontSize = 12;
-    const maxWidth = 170; // Maximum width for text to avoid overflow
-  
+    const maxWidth = 170; // Maximum width to prevent text overflow
+
     // Set font for title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(titleFontSize);
-  
-    // Center the name at the top
-    const nameWidth = doc.getTextWidth(formData.name || 'Name');
-    const nameX = (doc.internal.pageSize.width - nameWidth) / 2; // Center the name on the page
-    doc.text(formData.name || 'Name', nameX, marginY);
-  
-    // Add the rest of the personal information (Email, Phone, Address)
+
+    let currentY = marginY; // Track vertical position
+
+    // Add profile image if available
+    if (mediaPreview) {
+        const imageWidth = 40;
+        const imageHeight = 40;
+        doc.addImage(mediaPreview, "JPEG", marginX, currentY, imageWidth, imageHeight);
+    }
+
+    // Calculate name position dynamically based on the image
+    const name = formData.name || 'Name';
+    const nameWidth = doc.getTextWidth(name);
+    const imageWidth = mediaPreview ? 40 : 0; // Only reserve space if image exists
+    const nameX = marginX + imageWidth + (mediaPreview ? 10 : 0); // Adjust based on image presence
+
+    // Add name next to the image
+    doc.text(name, nameX, currentY + 10);
+    currentY += titleFontSize / 2 + 10; // Adjust Y-position after the name
+
+    // Add Personal Information directly below name
     doc.setFontSize(contentFontSize);
     doc.setFont("helvetica", "normal");
-  
-    let yOffset = marginY + titleFontSize + lineHeight * 2;
-  
-    // Address and Contact info aligned as in the image (on one line with spacing)
-    const addressLine1 = formData.address || '123 Main St, City, Country';
-    const addressLine2 = formData.address2 || '456 Another St, City, Country'; // Assuming two address fields
+
     const phone = formData.phone || '(555) 555-5555';
     const email = formData.email || 'email@example.com';
-  
-    const addressText = `${addressLine1} · ${addressLine2}`;
-    const contactText = `${phone} · ${email}`;
-    
-    doc.text(addressText, marginX, yOffset);
-    yOffset += lineHeight * 1.5;  // Adjust spacing after the address
-  
-    doc.text(contactText, marginX, yOffset);
-    yOffset += lineHeight * 2; // Add space before the next section
-  
+    const address = `${formData.address || '123 Main St, City'} · ${formData.address2 || '456 Another St'}`;
+
+    doc.text(phone, nameX, currentY);
+    currentY += lineHeight;
+    doc.text(email, nameX, currentY);
+    currentY += lineHeight;
+    doc.text(address, nameX, currentY);
+    currentY += lineHeight * 2; // Extra space before the next section
+
     // Add Education Section
     doc.setFontSize(sectionFontSize);
     doc.setFont("helvetica", "bold");
-    doc.text("Education:", marginX, yOffset);
+    doc.text("Education:", marginX, currentY);
+    currentY += lineHeight;
+
     doc.setFontSize(contentFontSize);
     doc.setFont("helvetica", "normal");
-    yOffset += lineHeight;
-  
-    formData.education.forEach((edu, index) => {
-      doc.text(`${edu.degree} from ${edu.institution}, ${edu.year}`, marginX, yOffset);
-      yOffset += lineHeight;
+
+    formData.education.forEach((edu) => {
+        doc.text(`${edu.degree} from ${edu.institution}, ${edu.year}`, marginX, currentY);
+        currentY += lineHeight;
     });
-  
+
+    currentY += lineHeight; // Space before next section
+
     // Add Experience Section
     doc.setFontSize(sectionFontSize);
     doc.setFont("helvetica", "bold");
-    doc.text("Experience:", marginX, yOffset);
+    doc.text("Experience:", marginX, currentY);
+    currentY += lineHeight;
+
     doc.setFontSize(contentFontSize);
     doc.setFont("helvetica", "normal");
-    yOffset += lineHeight;
-  
-    formData.experience.forEach((exp, index) => {
-      doc.text(`${exp.jobTitle} at ${exp.company} (${exp.duration})`, marginX, yOffset);
-      yOffset += lineHeight;
-  
-      // Add description with text wrapping
-      const descriptionText = exp.description || 'No description available';
-      doc.setFont("helvetica", "normal");
-      doc.text(descriptionText, marginX, yOffset, { maxWidth: maxWidth });
-      
-      // Calculate how many lines the description occupies
-      const descriptionLines = doc.getTextDimensions(descriptionText, { maxWidth }).h / lineHeight;
-      yOffset += Math.ceil(descriptionLines) * lineHeight; // Adjust yOffset for description
-  
+
+    formData.experience.forEach((exp) => {
+        doc.text(`${exp.jobTitle} at ${exp.company} (${exp.duration})`, marginX, currentY);
+        currentY += lineHeight;
+
+        const descriptionText = exp.description || 'No description available';
+        doc.text(descriptionText, marginX, currentY, { maxWidth });
+
+        const descriptionLines = doc.getTextDimensions(descriptionText, { maxWidth }).h / lineHeight;
+        currentY += Math.ceil(descriptionLines) * lineHeight; // Adjust for description height
     });
-  
-    // Add space before Skills Section
-    yOffset += lineHeight;  // Make sure there is enough space before the next section
-  
+
+    currentY += lineHeight; // Space before next section
+
     // Add Skills Section
     doc.setFontSize(sectionFontSize);
     doc.setFont("helvetica", "bold");
-    doc.text("Skills:", marginX, yOffset);
+    doc.text("Skills:", marginX, currentY);
+    currentY += lineHeight;
+
     doc.setFontSize(contentFontSize);
     doc.setFont("helvetica", "normal");
-    yOffset += lineHeight;
-  
-    formData.skills.forEach((skill, index) => {
-      doc.text(`• ${skill}`, marginX, yOffset);
-      yOffset += lineHeight;
+
+    formData.skills.forEach((skill) => {
+        doc.text(`• ${skill}`, marginX, currentY);
+        currentY += lineHeight;
     });
-  
-    // If there is a profile image, add it (Positioning it properly in the PDF)
-    if (mediaPreview) {
-      const imageWidth = 40;
-      const imageHeight = 40;
-      doc.addImage(mediaPreview, "JPEG", 150, marginY, imageWidth, imageHeight);
-      yOffset += imageHeight + lineHeight;
-    }
-  
-    // Add Footer for better structure (Optional)
+
+    // Footer for better structure
     doc.setFontSize(10);
-    doc.text("Generated by Resume Builder", marginX, yOffset);
-  
-    // Save the PDF to download
+    doc.text("Generated by Resume Builder", marginX, currentY);
+
+    // Save the PDF
     doc.save("resume.pdf");
 };
 
-
-  
-  // Add new item to a section (education, experience, skills)
-const addSectionItem = (section) => {
+ // Add new item to a section (education, experience, skills)
+  const addSectionItem = (section) => {
     const newItem =
       section === "education"
         ? { degree: "", institution: "", year: "" }
@@ -436,7 +434,7 @@ const addSectionItem = (section) => {
                   />
                   <button
                     onClick={() => removeSectionItem('experience', index)}
-                    className="bg-red-500 text-white text-xs px-4 py-2 rounded ml-2"
+                    className="bg-red-500 text-white text-sm px-4 py-2 rounded ml-2"
                   >
                     Remove
                   </button>
@@ -473,17 +471,18 @@ const addSectionItem = (section) => {
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={handleGenerateExperience}
-              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2 mb-4"
             >
               {loadingSummary ? 'Generating...' : 'Generate Experience Details'}
             </motion.button>
 
+            {/* Add a margin to the bottom of the Generate Experience button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="button"
               onClick={generateResumePDF} // Trigger the PDF generation
-              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2 mb-4"
+              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2 mt-2" // Add `mt-2` to create a small gap
             >
               <PenSquare className="w-5 h-5" />
               {loading ? 'Saving...' : 'Create Resume'}

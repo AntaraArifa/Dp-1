@@ -8,12 +8,7 @@ import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 import chatRoute from "./routes/chat.route.js";
-<<<<<<< HEAD
-import resumeRoute from "./routes/resume.routes.js"; // Import the Resume route
-import notificationRoute from "./routes/notification.route.js"; 
-=======
 import resumeRoute from "./routes/resume.routes.js";
->>>>>>> 45e16826b58f88cb1490cf6c6d84cb0274640374
 
 // Load environment variables
 dotenv.config();
@@ -34,15 +29,10 @@ app.use(express.urlencoded({ extended: true }));
 // Cookie parser middleware
 app.use(cookieParser());
 
-<<<<<<< HEAD
-// CORS configuration
-const allowedOrigins = ["http://localhost:5173","http://localhost:5174","http://localhost:3000"];
-=======
 // Define allowed origins
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"];
 
 // CORS options
->>>>>>> 45e16826b58f88cb1490cf6c6d84cb0274640374
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -66,12 +56,7 @@ app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/chat", chatRoute);
-<<<<<<< HEAD
-app.use("/api/v1/resumes", resumeRoute); // Register the Resume route
-app.use("/api/v1/notification", notificationRoute);
-=======
 app.use("/api/v1/resumes", resumeRoute);
->>>>>>> 45e16826b58f88cb1490cf6c6d84cb0274640374
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
