@@ -9,7 +9,6 @@ import { USER_API_END_POINT } from "@/utils/constant";
 import axios from "axios";
 import { toast } from "sonner";
 import { setUser } from "@/redux/authSlice";
-import { setNotifications, setLoadingStatus } from "@/redux/notificationSlice"; // Import actions
 import useGetAllNotifications from "@/hooks/useGetAllNotifications"; // Import the custom hook
 
 const Navbar = () => {

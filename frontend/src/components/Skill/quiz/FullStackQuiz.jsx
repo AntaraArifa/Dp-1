@@ -3,30 +3,19 @@ import React, { useState, useEffect } from "react";
 const FullStackQuiz = () => {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes in seconds
-  const [currentSet, setCurrentSet] = useState(1); // Track the current set of 5 questions
-  const [selectedAnswers, setSelectedAnswers] = useState({}); // Track selected answers
+  const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes
+  const [currentSet, setCurrentSet] = useState(1);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
 
   const questions = [
-    
     {
       question: "Which JavaScript function is used to select an element by its ID?",
-      options: [
-        "getElementByClass",
-        "getElementById",
-        "querySelector",
-        "queryById",
-      ],
+      options: ["getElementByClass", "getElementById", "querySelector", "queryById"],
       answer: "getElementById",
     },
     {
       question: "What is React primarily used for?",
-      options: [
-        "Developing Operating Systems",
-        "Database Management",
-        "Machine Learning",
-        "Building User Interfaces",
-      ],
+      options: ["Developing Operating Systems", "Database Management", "Machine Learning", "Building User Interfaces"],
       answer: "Building User Interfaces",
     },
     {
@@ -36,22 +25,12 @@ const FullStackQuiz = () => {
     },
     {
       question: "What does CSS stand for?",
-      options: [
-        "Creative Style System",
-        "Computer Style Sheets",
-        "Cascading Style Sheets",
-        "Colorful Style Sheets",
-      ],
+      options: ["Creative Style System", "Computer Style Sheets", "Cascading Style Sheets", "Colorful Style Sheets"],
       answer: "Cascading Style Sheets",
     },
     {
       question: "What does REST stand for?",
-      options: [
-        "Representational State Transfer",
-        "Resource State Transfer",
-        "Rapid State Transfer",
-        "Request State Transfer",
-      ],
+      options: ["Representational State Transfer", "Resource State Transfer", "Rapid State Transfer", "Request State Transfer"],
       answer: "Representational State Transfer",
     },
     {
@@ -61,12 +40,7 @@ const FullStackQuiz = () => {
     },
     {
       question: "What is the purpose of CORS in web development?",
-      options: [
-        "To control how resources are fetched",
-        "To protect data from unauthorized access",
-        "To allow cross-origin requests",
-        "To parse JSON data",
-      ],
+      options: ["To control how resources are fetched", "To protect data from unauthorized access", "To allow cross-origin requests", "To parse JSON data"],
       answer: "To allow cross-origin requests",
     },
     {
@@ -81,12 +55,7 @@ const FullStackQuiz = () => {
     },
     {
       question: "What is the purpose of JWT in backend development?",
-      options: [
-        "For managing database connections",
-        "For user authentication and authorization",
-        "For data storage",
-        "For running background tasks",
-      ],
+      options: ["For managing database connections", "For user authentication and authorization", "For data storage", "For running background tasks"],
       answer: "For user authentication and authorization",
     },
     {
@@ -151,28 +120,19 @@ const FullStackQuiz = () => {
     },
   ];
 
-  const questionsPerSet = 5;
+  const questionsPerSet = 10;
 
-  // Timer logic
   useEffect(() => {
     if (timeLeft > 0 && !showResult) {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
-
-      return () => clearInterval(timer); // Cleanup the timer
+      const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+      return () => clearInterval(timer);
     } else if (timeLeft === 0) {
-      setShowResult(true); // Show result if time runs out
+      setShowResult(true);
     }
   }, [timeLeft, showResult]);
 
   const handleAnswerClick = (selectedOption, questionIndex) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionIndex]: selectedOption,
-    }));
-
-    // Update score only if the selected answer is correct
+    setSelectedAnswers((prev) => ({ ...prev, [questionIndex]: selectedOption }));
     if (selectedOption === questions[questionIndex].answer) {
       setScore((prevScore) => prevScore + 1);
     }
@@ -180,19 +140,14 @@ const FullStackQuiz = () => {
 
   const moveToNextSet = () => {
     const startIndex = (currentSet - 1) * questionsPerSet;
-    const endIndex = startIndex + questionsPerSet;
-
-    // Check if all questions in the current set have been answered
     const allAnswered = questions
-      .slice(startIndex, endIndex)
+      .slice(startIndex, startIndex + questionsPerSet)
       .every((_, index) => selectedAnswers[startIndex + index] !== undefined);
 
     if (allAnswered) {
       if (currentSet * questionsPerSet >= questions.length) {
-        // If all sets are finished, show the result
         setShowResult(true);
       } else {
-        // Move to the next set
         setCurrentSet((prevSet) => prevSet + 1);
       }
     } else {
@@ -203,9 +158,9 @@ const FullStackQuiz = () => {
   const resetQuiz = () => {
     setScore(0);
     setShowResult(false);
-    setTimeLeft(1200); // Reset timer to 20 minutes
+    setTimeLeft(1200);
     setCurrentSet(1);
-    setSelectedAnswers({}); // Reset selected answers
+    setSelectedAnswers({});
   };
 
   const formatTime = () => {
@@ -220,84 +175,81 @@ const FullStackQuiz = () => {
   );
 
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
-      {/* Title */}
-      <h1 className="text-center text-3xl font-bold text-left mb-6">
-        Full Stack Developer Quiz
+    <div className="max-w-3xl mx-auto px-4 py-10">
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-4">
+        🧩 Full Stack Developer Quiz
       </h1>
-      <p className="mb-4 text-left">
-        Test your knowledge of full-stack development with this interactive quiz.
-        Answer questions across multiple sets and track your progress! You must
-        answer all the questions of one set to move to the next set.
-        <br />
+      <p className="text-center text-gray-600 text-lg mb-8">
+        Test your full-stack knowledge in timed sets of{" "}
+        <strong>10 questions</strong>. You must complete all questions in a set
+        before moving forward. Let’s see what you’ve got!
       </p>
-      <p className="text-center font-bold text-3xl">Best of luck!</p>
-      <br />
 
       {!showResult ? (
-        currentQuestions.length > 0 ? (
-          <>
-            {/* Timer in a box */}
-            <div className="timer text-xl font-semibold text-red-500 mb-6 bg-gray-100 border border-red-400 rounded-lg p-4 w-fit mx-auto text-center">
-              Time Left: {formatTime()}
+        <>
+          <div className="text-center mb-6">
+            <div className="inline-block bg-red-100 text-red-600 font-semibold px-5 py-2 rounded-full shadow-sm border border-red-300">
+              ⏱️ Time Left: {formatTime()}
             </div>
+          </div>
 
-            <div className="question-container">
-              {currentQuestions.map((question, index) => {
-                const globalIndex = (currentSet - 1) * questionsPerSet + index; // Calculate global index
-
-                return (
-                  <div key={index} className="mb-6">
-                    <h3 className="text-lg mb-3 text-left">
-                      Q{globalIndex + 1}: {question.question}
-                    </h3>
-                    <div className="options flex flex-col gap-4">
-                      {question.options.map((option, idx) => {
-                        const isSelected =
-                          selectedAnswers[globalIndex] === option;
-
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() =>
-                              handleAnswerClick(option, globalIndex)
-                            }
-                            className={`${
+          <div className="space-y-8">
+            {currentQuestions.map((question, index) => {
+              const globalIndex = (currentSet - 1) * questionsPerSet + index;
+              return (
+                <div key={index} className="bg-white p-6 rounded-xl shadow-md">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Q{globalIndex + 1}. {question.question}
+                  </h3>
+                  <div className="space-y-3">
+                    {question.options.map((option, idx) => {
+                      const isSelected = selectedAnswers[globalIndex] === option;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleAnswerClick(option, globalIndex)}
+                          className={`block w-full text-left px-5 py-3 rounded-lg transition-all font-medium
+                            ${
                               isSelected
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-200"
-                            } text-black px-6 py-3 rounded-lg hover:bg-blue-700 w-full text-left`}
-                          >
-                            {option}
-                          </button>
-                        );
-                      })}
-                    </div>
+                                ? "bg-blue-600 text-white hover:bg-blue-700"
+                                : "bg-gray-100 hover:bg-blue-100"
+                            }`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="text-center mt-10">
             <button
               onClick={moveToNextSet}
-              className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 mt-6"
+              className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-green-600 transition"
             >
-              Next Set
+              ➡️ Next Set
             </button>
-          </>
-        ) : (
-          <p>No questions available for this quiz.</p>
-        )
+          </div>
+        </>
       ) : (
-        <div className="result text-left">
-          <h2 className="text-2xl font-bold mb-4">Quiz Completed!</h2>
-          <p className="mb-4">
-            Your Score: {score}/{questions.length}
+        <div className="text-center bg-white shadow-lg rounded-xl p-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            🎉 Quiz Completed!
+          </h2>
+          <p className="text-xl text-gray-700 mb-6">
+            Your Score:{" "}
+            <span className="text-blue-600 font-semibold">
+              {score}/{questions.length}
+            </span>
           </p>
           <button
             onClick={resetQuiz}
-            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Retake Quiz
+            🔁 Retake Quiz
           </button>
         </div>
       )}
