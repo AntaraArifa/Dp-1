@@ -199,7 +199,7 @@ function ResumeEditor() {
   const generateExperience = async (company, duration, jobTitle, description) => {
     try {
         const groq = new Groq({
-            apiKey: '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',
+            apiKey: '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',
             dangerouslyAllowBrowser: true,
         });
 
