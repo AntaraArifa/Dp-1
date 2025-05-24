@@ -27,6 +27,10 @@ import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJobs";
 import PostJob from "./components/admin/PostJob";
 import Applicants from "./components/admin/Applicants";
+import CreateAssessmentLink from "./components/admin/CreateAssessmentLink";
+import AssessmentCreator from "./components/admin/AssessmentCreator";
+import SubmitAssessmentForm from "./components/admin/SubmitAssessmentForm";
+
 
 // Resume Builder Components
 import ResumeEditor from "./components/ResumeEditor";
@@ -84,6 +88,12 @@ const router = createBrowserRouter([
   { path: "/admin/jobs", element: <AdminJobs /> },
   { path: "/admin/jobs/create", element: <PostJob /> },
   { path: "/admin/jobs/:id/applicants", element: <Applicants /> },
+  {
+    path: "/admin/AssessmentCreator",
+    element: <AssessmentCreator /> // Direct route without nesting
+  },
+  { path: "/admin/assessment-link", element: <CreateAssessmentLink /> },
+
 
   // Resume Builder Routes
   { path: "/resume/edit", element: <ResumeEditor /> },
@@ -93,8 +103,8 @@ const router = createBrowserRouter([
     element: <DynamicTemplatePreview />
   },
   {
-    path:"/meeting/:roomId",
-    element:<MeetingPage/>
+    path: "/meeting/:roomId",
+    element: <MeetingPage />
   },
   /*{
     path:"/interview-meeting/:applicantId",

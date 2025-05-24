@@ -10,6 +10,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { setUser } from "@/redux/authSlice";
 import useGetAllNotifications from "@/hooks/useGetAllNotifications"; // Import the custom hook
+import CreateAssessmentLink from "../admin/CreateAssessmentLink";
+
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -72,6 +74,9 @@ const Navbar = () => {
                   </li>
                   <li className="hover:text-[#F83002] cursor-pointer">
                     <Link to="/chat">Chat</Link>
+                  </li>
+                  <li className="hover:text-[#F83002] cursor-pointer">
+                    <CreateAssessmentLink />
                   </li>
                 </ul>
               ) : (
