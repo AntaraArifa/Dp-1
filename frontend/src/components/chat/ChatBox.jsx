@@ -4,15 +4,17 @@ import useGetAllChatMessages from "@/hooks/useGetAllChatMessages";
 import axios from "axios";
 import { CHAT_API_END_POINT } from "@/utils/constant";
 import store from "@/redux/store";
-import { setSelectedChat } from "@/redux/chatSlice"; 
+import { setSelectedChat, updateLatestMessage } from "@/redux/chatSlice";
 import { addMessage } from "@/redux/messageSlice";
+import { LogOut, Send } from "lucide-react";
+
 
 const ChatBox = () => {
-  const loggedInUserId = useSelector((store) => store.auth.user); 
-  const selectedChat = useSelector((store) => store.chat.selectedChat); 
+  const loggedInUserId = useSelector((store) => store.auth.user);
+  const selectedChat = useSelector((store) => store.chat.selectedChat);
   const { messages: initialMessages, loading, error } = useGetAllChatMessages(selectedChat);
 
-  const [messages, setMessages] = useState([]); 
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -42,7 +44,12 @@ const ChatBox = () => {
 
       // Update Redux store
       store.dispatch(addMessage(sentMessage));
-      
+      store.dispatch(updateLatestMessage({
+        chatId: sentMessage.chat._id,
+        latestMessage: sentMessage,
+      }));
+
+
 
       // Update local messages state
       setMessages((prevMessages) => [...prevMessages, sentMessage]);
@@ -71,7 +78,7 @@ const ChatBox = () => {
       );
 
       console.log("Left group successfully:", response.data);
-      store.dispatch(setSelectedChat(null)); 
+      store.dispatch(setSelectedChat(null));
     } catch (error) {
       console.error("Failed to leave group:", error.response?.data || error.message);
     } finally {
@@ -87,16 +94,19 @@ const ChatBox = () => {
         {selectedChat?.isGroupChat && (
           <button
             onClick={handleLeaveGroup}
-            className={`px-4 py-2 text-white rounded ${leaving ? "bg-gray-400" : "bg-red-500"}`}
+            className={`flex items-center gap-2 px-4 py-2 text-white rounded ${leaving ? "bg-gray-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
+              }`}
             disabled={leaving}
           >
+            <LogOut className="w-4 h-4" />
             {leaving ? "Leaving..." : "Leave Group"}
           </button>
         )}
+
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-blue-50">
         {loading ? (
           <p className="text-center text-gray-500">Loading messages...</p>
         ) : error ? (
@@ -115,7 +125,7 @@ const ChatBox = () => {
                 />
               )}
               <div
-                className={`p-2 rounded ${msg.sender._id === loggedInUserId._id ? "bg-blue-100 ml-auto" : "bg-gray-100"}`}
+                className={`p-2 rounded ${msg.sender._id === loggedInUserId._id ? "bg-blue-400 ml-auto" : "bg-white"}`}
               >
                 <p className="text-sm font-bold">{msg.sender.fullname}</p>
                 <p>{msg.content}</p>
@@ -132,18 +142,20 @@ const ChatBox = () => {
         <input
           type="text"
           placeholder="Type your message..."
-          className="w-full p-2 rounded border"
+          className="w-full py-1 px-1 rounded border mr-2"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           disabled={sending || !selectedChat}
         />
         <button
           onClick={handleSendMessage}
-          className={`ml-2 px-4 py-2 ${sending ? "bg-gray-400" : "bg-blue-500"} text-white rounded`}
+          className={`${sending ? "bg-gray-400 cursor-not-allowed" : "bg-transparent hover:bg-gray-200"} text-white p-2 rounded transition-colors duration-200`}
           disabled={sending || !selectedChat}
+          title="Send"
         >
-          {sending ? "Sending..." : "Send"}
+          <Send className={`w-5 h-5 ${sending ? "text-gray-700" : "text-green-500"}`} />
         </button>
+
       </div>
     </div>
   );

@@ -20,7 +20,17 @@ const chatSlice = createSlice({
         clearSelectedChat: (state) => {
             state.selectedChat = null;
         },
-        
+        updateLatestMessage: (state, action) => {
+            const { chatId, latestMessage } = action.payload;
+            const chatIndex = state.allChats.chats?.findIndex(chat => chat._id === chatId);
+            if (chatIndex !== -1) {
+                state.allChats.chats[chatIndex].latestMessage = latestMessage;
+
+                const updatedChat = state.allChats.chats.splice(chatIndex, 1)[0];
+                state.allChats.chats.unshift(updatedChat);
+            }
+        }
+
     },
 });
 
@@ -29,6 +39,7 @@ export const {
     setSelectedChat,
     setSearchChatText,
     clearSelectedChat,
+    updateLatestMessage
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

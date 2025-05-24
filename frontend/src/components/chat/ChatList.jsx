@@ -4,6 +4,9 @@ import { setSelectedChat } from "@/redux/chatSlice";
 import useGetAllUserChats from "@/hooks/useGetAllUserChats";
 import AddMembersDialog from "../AddMembersDialog";
 import CreateGroupChatDialog from "../CreateGroupChatDialog";
+import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
+
 
 const ChatList = ({ onChatSelect }) => {
   const [searchText, setSearchText] = useState("");
@@ -17,6 +20,7 @@ const ChatList = ({ onChatSelect }) => {
   const selectedChat = useSelector((store) => store.chat.selectedChat);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Fetch all user chats
   useGetAllUserChats();
@@ -68,13 +72,22 @@ const ChatList = ({ onChatSelect }) => {
     <div className="w-1/3 border-r h-screen bg-white">
       {/* Header */}
       <div className="p-4 border-b flex justify-between items-center">
+        <button
+          onClick={() => navigate("/")}
+          className="text-gray-600 hover:text-black font-medium"
+        >
+          ← Back
+        </button>
         <h2 className="text-lg font-semibold">Chats</h2>
         <button
           onClick={openCreateGroupChatDialog}
-          className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+          className="flex items-center gap-2 text-white bg-blue-500 px-3 py-2 rounded-md hover:bg-blue-600"
+          title="Create Group"
         >
-          Create Group
+          <Plus className="w-5 h-5" />
+          <span>Create Group</span>
         </button>
+
       </div>
 
       {/* Search Bar */}
@@ -106,22 +119,13 @@ const ChatList = ({ onChatSelect }) => {
                 className="flex items-center p-4 cursor-pointer hover:bg-gray-100"
                 onClick={() => handleChatSelect(chat)}
               >
-                <img
-                  src={
-                    chat.isGroupChat
-                      ? "/group-avatar.png"
-                      : recipient?.profile?.profilePhoto || "/default-avatar.png"
-                  }
-                  alt="Chat Avatar"
-                  className="w-10 h-10 rounded-full mr-4"
-                />
+                
                 <div className="flex-1">
                   <p className="font-bold">{chatName}</p>
                   <p className="text-gray-500 text-sm truncate">
                     {chat.latestMessage
-                      ? `${chat.latestMessage.sender.fullname || "Unknown"}: ${
-                          chat.latestMessage.content || "No content"
-                        }`
+                      ? `${chat.latestMessage.sender.fullname || "Unknown"}: ${chat.latestMessage.content || "No content"
+                      }`
                       : "No messages yet"}
                   </p>
                 </div>
