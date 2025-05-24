@@ -30,6 +30,7 @@ import Applicants from "./components/admin/Applicants";
 import CreateAssessmentLink from "./components/admin/CreateAssessmentLink";
 import AssessmentCreator from "./components/admin/AssessmentCreator";
 import SubmitAssessmentForm from "./components/admin/SubmitAssessmentForm";
+import AssessmentDashboard from "./components/admin/AssessmentDashboard";
 
 
 // Resume Builder Components
@@ -93,6 +94,8 @@ const router = createBrowserRouter([
     element: <AssessmentCreator /> // Direct route without nesting
   },
   { path: "/admin/assessment-link", element: <CreateAssessmentLink /> },
+{ path: "/admin/AssessmentDashboard", element: <AssessmentDashboard /> },
+
 
 
   // Resume Builder Routes

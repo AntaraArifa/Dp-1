@@ -76,6 +76,9 @@ const Navbar = () => {
                     <Link to="/chat">Chat</Link>
                   </li>
                   <li className="hover:text-[#F83002] cursor-pointer">
+                    <Link to="/admin/AssessmentDashboard">Assessment Dashboard</Link>
+                  </li>
+                  <li className="hover:text-[#F83002] cursor-pointer">
                     <CreateAssessmentLink />
                   </li>
                 </ul>
