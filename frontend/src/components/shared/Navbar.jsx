@@ -9,13 +9,12 @@ import { USER_API_END_POINT } from "@/utils/constant";
 import axios from "axios";
 import { toast } from "sonner";
 import { setUser } from "@/redux/authSlice";
-import useGetAllNotifications from "@/hooks/useGetAllNotifications"; // Import the custom hook
+import useGetAllNotifications from "@/hooks/useGetAllNotifications";
 import CreateAssessmentLink from "../admin/CreateAssessmentLink";
-
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
-  const { notifications, loadingStatus } = useSelector((store) => store.notification); // Get notifications and loadingStatus from Redux store
+  const { notifications, loadingStatus } = useSelector((store) => store.notification);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -50,178 +49,216 @@ const Navbar = () => {
   }, [notifications]);
 
   return (
-    <div className="bg-white shadow-md w-full">
-      <div className="flex items-center justify-between px-4 h-16 max-w-full">
-        {/* Left side - SmartHire */}
-        <div>
-          <h1 className="text-2xl font-bold">
-            Smart<span className="text-[#F83002]">Hire</span>
-          </h1>
-        </div>
+    <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Smart<span className="text-[#6A38C2]">Hire</span>
+            </h1>
+          </Link>
 
-        {/* Right side - Navigation links */}
-        <div className="flex items-center gap-8">
-          {user ? (
-            <>
-              {/* Show these links only when the user is logged in */}
-              {user.role === "Employer" ? (
-                <ul className="no-bullets">
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/admin/companies">Companies</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/admin/jobs">Jobs</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/chat">Chat</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/admin/AssessmentDashboard">Assessment Dashboard</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <CreateAssessmentLink />
-                  </li>
-                </ul>
-              ) : (
-                <ul className="no-bullets flex gap-8">
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/">Home</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/jobs">Jobs</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/chat">Chat</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/skillAssessment">Skill Assessment</Link>
-                  </li>
-                  <li className="hover:text-[#F83002] cursor-pointer">
-                    <Link to="/resume/edit">Resume</Link>
-                  </li>
-
-                  {/* Notification Bell for Job Seekers */}
-                  {user.role === "Job Seeker" && (
-                    <li>
-                      <div className="relative">
-                        {/* Notification Bell */}
-                        <Popover>
-                          <PopoverTrigger>
-                            <div className="relative cursor-pointer">
-                              <Bell className="text-blue-600 w-6 h-6" />
-                              {unreadCount > 0 && (
-                                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                                  {unreadCount}
-                                </span>
-                              )}
-                            </div>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80 p-4 shadow-lg rounded-lg bg-white">
-                            <h4 className="font-medium mb-2">Notifications</h4>
-                            {Array.isArray(notifications) && notifications.length > 0 ? (
-                              notifications.map((notif, index) => (
-                                <div key={index} className="border-b py-2">
-                                  {/* Sender's Full Name */}
-                                  <p className="font-semibold text-gray-700">
-                                    From: {notif.sender.fullname || "Unknown"}
-                                  </p>
-
-                                  {/* Interview Message */}
-                                  <p className="text-sm">{notif.message}</p>
-
-                                  {/* Meeting Link */}
-                                  {notif.meetingLink && (
-                                    <a
-                                      href={notif.meetingLink}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 underline block mt-1"
-                                    >
-                                      Join Meeting
-                                    </a>
-                                  )}
-
-                                  {/* Interview Date & Time */}
-                                  {notif.interviewDateTime && (
-                                    <p className="text-xs text-gray-500">
-                                      Interview on: {new Date(notif.interviewDateTime).toLocaleString()}
-                                    </p>
-                                  )}
-
-                                  {/* Timestamp */}
-                                  <p className="text-xs text-gray-400">
-                                    {new Date(notif.createdAt).toLocaleString()}
-                                  </p>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-gray-500">No notifications</p>
-                            )}
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </li>
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-8">
+            {user ? (
+              <>
+                {/* Navigation Menu */}
+                <div className="hidden md:flex items-center space-x-6">
+                  {user.role === "Employer" ? (
+                    <>
+                      <Link 
+                        to="/admin/companies" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Companies
+                      </Link>
+                      <Link 
+                        to="/admin/jobs" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Jobs
+                      </Link>
+                      <Link 
+                        to="/chat" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Chat
+                      </Link>
+                      <Link 
+                        to="/admin/AssessmentDashboard" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Assessments
+                      </Link>
+                      <CreateAssessmentLink />
+                    </>
+                  ) : (
+                    <>
+                      <Link 
+                        to="/" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Home
+                      </Link>
+                      <Link 
+                        to="/jobs" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Jobs
+                      </Link>
+                      <Link 
+                        to="/chat" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Chat
+                      </Link>
+                      <Link 
+                        to="/skillAssessment" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Skills
+                      </Link>
+                      <Link 
+                        to="/resume/edit" 
+                        className="text-gray-700 hover:text-[#6A38C2] transition-colors duration-200 font-medium"
+                      >
+                        Resume
+                      </Link>
+                    </>
                   )}
-                </ul>
-              )}
+                </div>
 
-              {/* User Profile & Logout */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Avatar className="cursor-pointer ml-4 w-10 h-10 rounded-full">
-                    <AvatarImage
-                      src={user?.profile?.profilePhoto}
-                      alt="Profile"
-                      className="rounded-full"
-                    />
-                  </Avatar>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-4 shadow-lg rounded-lg bg-white">
-                  <div className="flex gap-4 items-center">
-                    <Avatar className="w-12 h-12 rounded-full">
-                      <AvatarImage
-                        src={user?.profile?.profilePhoto}
-                        alt="Profile"
-                        className="rounded-full"
-                      />
-                    </Avatar>
-                    <div>
-                      <h4 className="font-medium">{user?.fullname}</h4>
-                      <p className="text-sm text-gray-500">{user?.profile?.bio}</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col text-gray-600 mt-4">
-                    {user.role === "Job Seeker" && (
-                      <div className="flex w-fit items-center gap-2 cursor-pointer mt-2">
-                        <button className="text-gray-600 hover:text-blue-600">
-                          <Link to="/profile">View Profile</Link>
-                        </button>
+                {/* Notifications for Job Seekers */}
+                {user.role === "Job Seeker" && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="relative p-2 text-gray-600 hover:text-[#6A38C2] transition-colors duration-200">
+                        <Bell className="w-5 h-5" />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-0 shadow-lg border-0 bg-white rounded-lg">
+                      <div className="p-4 border-b border-gray-100">
+                        <h4 className="font-semibold text-gray-900">Notifications</h4>
                       </div>
-                    )}
-                    <div className="flex w-fit items-center gap-2 cursor-pointer mt-2">
-                      <LogOut />
-                      <Button onClick={logoutHandler} variant="link">
-                        Logout
-                      </Button>
+                      <div className="max-h-80 overflow-y-auto">
+                        {Array.isArray(notifications) && notifications.length > 0 ? (
+                          notifications.map((notif, index) => (
+                            <div key={index} className="p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                              <p className="font-medium text-gray-900 text-sm mb-1">
+                                From: {notif.sender.fullname || "Unknown"}
+                              </p>
+                              <p className="text-sm text-gray-700 mb-2">{notif.message}</p>
+                              
+                              {notif.meetingLink && (
+                                <a
+                                  href={notif.meetingLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-block text-[#6A38C2] hover:text-purple-700 text-sm font-medium mb-2"
+                                >
+                                  Join Meeting →
+                                </a>
+                              )}
+                              
+                              {notif.interviewDateTime && (
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Interview: {new Date(notif.interviewDateTime).toLocaleString()}
+                                </p>
+                              )}
+                              
+                              <p className="text-xs text-gray-400">
+                                {new Date(notif.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-4 text-center text-gray-500">
+                            No notifications
+                          </div>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+
+                {/* User Profile */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage
+                          src={user?.profile?.profilePhoto}
+                          alt="Profile"
+                          className="rounded-full"
+                        />
+                      </Avatar>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-0 shadow-lg border-0 bg-white rounded-lg">
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage
+                            src={user?.profile?.profilePhoto}
+                            alt="Profile"
+                            className="rounded-full"
+                          />
+                        </Avatar>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{user?.fullname}</h4>
+                          <p className="text-sm text-gray-500">{user?.profile?.bio}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </>
-          ) : (
-            // Show these options only when the user is logged out
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <Button variant="outline">Login</Button>
-              </Link>
-              <Link to="/signup">
-                <Button className="bg-[#6A38C2] hover:bg-[#5b30a6]">Signup</Button>
-              </Link>
-            </div>
-          )}
+                    
+                    <div className="p-2">
+                      {user.role === "Job Seeker" && (
+                        <Link 
+                          to="/profile"
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                        >
+                          View Profile
+                        </Link>
+                      )}
+                      <button
+                        onClick={logoutHandler}
+                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Logout
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </>
+            ) : (
+              // Login/Signup buttons for non-authenticated users
+              <div className="flex items-center space-x-3">
+                <Link to="/login">
+                  <Button 
+                    variant="outline" 
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button className="bg-[#6A38C2] hover:bg-purple-700 text-white">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 };
 

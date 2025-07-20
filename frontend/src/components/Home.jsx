@@ -22,11 +22,13 @@ const Home = () => {
   }, [user, navigate]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Navbar />
       <HeroSection />
-      <CategoryCarausel />
-      <LatestJobs />
+      <div className="space-y-16 py-16">
+        <CategoryCarausel />
+        <LatestJobs />
+      </div>
       <Footer />
     </div>
   );

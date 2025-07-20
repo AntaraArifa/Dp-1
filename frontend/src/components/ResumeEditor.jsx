@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { X, PenSquare, Image as ImageIcon } from "lucide-react";
+import { X, PenSquare, Image as ImageIcon, Plus, Trash2, Download, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import Footer from "../components/shared/Footer";
 import Header from "../components/shared/Navbar";
@@ -44,7 +44,7 @@ function ResumeEditor() {
       console.error("Experience data is invalid", fetchedExperience);
     }
     setLoadingSummary(false);
-};
+  };
 
   const generateResumePDF = () => {
     const doc = new jsPDF();
@@ -195,67 +195,65 @@ function ResumeEditor() {
     setLoading(false);
   };
 
-
   const generateExperience = async (company, duration, jobTitle, description) => {
     try {
-        const groq = new Groq({
-            apiKey: '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',
-            dangerouslyAllowBrowser: true,
-        });
+      const groq = new Groq({
+        apiKey: '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',
+        dangerouslyAllowBrowser: true,
+      });
 
-        const response = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
-            temperature: 0.5,
-            max_tokens: 500,
-            messages: [
-                {
-                    role: "system",
-                    content:
-                        'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, company, duration, and job description, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
-                        '{\n' +
-                        '  "experience": [\n' +
-                        '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
-                        '  ]\n' +
-                        '}'
-                },
-                {
-                    role: "user",
-                    content: `Company: ${company}\nDuration: ${duration}\nJob Title: ${jobTitle}\nDescription: ${description}`,
-                },
-            ],
-        });
+      const response = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.5,
+        max_tokens: 500,
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are an AI assistant that generates a detailed job experience description for resumes. Based on the job title, company, duration, and job description, provide a comprehensive job experience for one experience level: Fresher. The experience level should include the following fields: job_title, company, duration, key_responsibilities, achievements, and skills_required. The output should be in the following JSON format:\n' +
+              '{\n' +
+              '  "experience": [\n' +
+              '    { "experience_level": "Fresher", "job_title": "Job Title", "company": "Company Name", "duration": "Duration", "key_responsibilities": ["Responsibility 1", "Responsibility 2", ...], "achievements": ["Achievement 1", "Achievement 2", ...], "skills_required": ["Skill 1", "Skill 2", ...] }\n' +
+              '  ]\n' +
+              '}'
+          },
+          {
+            role: "user",
+            content: `Company: ${company}\nDuration: ${duration}\nJob Title: ${jobTitle}\nDescription: ${description}`,
+          },
+        ],
+      });
 
-        let aiResponse = response.choices[0]?.message?.content.trim();
-        console.log('Raw AI Response:', aiResponse);
+      let aiResponse = response.choices[0]?.message?.content.trim();
+      console.log('Raw AI Response:', aiResponse);
 
-        if (aiResponse) {
-            let fixedResponse = aiResponse;
-            fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"');
-            fixedResponse = fixedResponse.replace(/,\s*$/, '');
+      if (aiResponse) {
+        let fixedResponse = aiResponse;
+        fixedResponse = fixedResponse.replace(/"Cloud computing platforms \(/g, '"Cloud computing platforms"');
+        fixedResponse = fixedResponse.replace(/,\s*$/, '');
 
-            const jsonMatch = fixedResponse.match(/\{.*\}/s);
+        const jsonMatch = fixedResponse.match(/\{.*\}/s);
 
-            if (jsonMatch && jsonMatch[0]) {
-                const rawJson = jsonMatch[0];
-                try {
-                    const experienceData = JSON.parse(rawJson);
-                    return experienceData.experience;
-                } catch (error) {
-                    console.error('Error parsing JSON:', error);
-                    return [];
-                }
-            } else {
-                throw new Error('No valid JSON found in the AI response');
-            }
+        if (jsonMatch && jsonMatch[0]) {
+          const rawJson = jsonMatch[0];
+          try {
+            const experienceData = JSON.parse(rawJson);
+            return experienceData.experience;
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+            return [];
+          }
         } else {
-            throw new Error('Empty AI response');
+          throw new Error('No valid JSON found in the AI response');
         }
+      } else {
+        throw new Error('Empty AI response');
+      }
     } catch (error) {
-        console.error("Error generating experience:", error);
-        return [];
+      console.error("Error generating experience:", error);
+      return [];
     }
-};
-
+  };
 
   const handleSelectExperience = (experienceDetail) => {
     setFormData({
@@ -276,7 +274,6 @@ function ResumeEditor() {
     });
   };
 
-
   const handleChange = (e, section, index = null, field = null) => {
     if (section === "skills" && index !== null) {
       const updatedSkills = [...formData.skills];
@@ -292,343 +289,435 @@ function ResumeEditor() {
   };
 
   return (
-    <div className="w-full bg-gray-100 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Navbar */}
       <Header />
 
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <div>
-          {/* Resume Form Section */}
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">Resume Builder</h2>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Resume <span className="text-[#6A38C2]">Builder</span>
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Create a professional resume with AI-powered suggestions and real-time preview
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit}>
-            {/* Personal Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Form Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Personal Information */}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleChange(e, 'name')}
-                  className="border rounded-lg p-3 w-full"
-                  placeholder="Enter your name"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleChange(e, 'email')}
-                  className="border rounded-lg p-3 w-full"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handleChange(e, 'phone')}
-                  className="border rounded-lg p-3 w-full"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Address</label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) => handleChange(e, 'address')}
-                  className="border rounded-lg p-3 w-full"
-                  placeholder="Enter your address"
-                />
-              </div>
-            </div>
-
-            {/* Skills Section */}
-            <div className="mb-6">
-              <h4 className="text-xl font-semibold text-gray-700">Skills</h4>
-              <div className="mt-2 flex flex-wrap gap-3">
-                {formData.skills.map((skill, index) => (
-                  <span key={index} className="bg-gray-200 text-gray-800 rounded-full px-4 py-1 text-sm">
-                    {skill || 'Skill'}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Education Section */}
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Education</h3>
-              {formData.education.map((edu, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex items-center space-x-2">
+                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                  <div className="w-2 h-6 bg-[#6A38C2] rounded-full mr-3"></div>
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                     <input
                       type="text"
-                      placeholder="Degree"
-                      value={edu.degree}
-                      onChange={(e) => handleChange(e, 'education', index, 'degree')}
-                      className="border rounded-lg p-2 flex-grow"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Institution"
-                      value={edu.institution}
-                      onChange={(e) => handleChange(e, 'education', index, 'institution')}
-                      className="border rounded-lg p-2 flex-grow"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Year"
-                      value={edu.year}
-                      onChange={(e) => handleChange(e, 'education', index, 'year')}
-                      className="border rounded-lg p-2"
+                      value={formData.name}
+                      onChange={(e) => handleChange(e, 'name')}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your full name"
                     />
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <button
-                      onClick={() => addSectionItem('education')}
-                      className="bg-black text-white text-sm px-4 py-2 rounded"
-                    >
-                      Add Education
-                    </button>
-                    <button
-                      onClick={() => removeSectionItem('education', index)}
-                      className="bg-red-500 text-white text-sm px-4 py-2 rounded"
-                    >
-                      Remove
-                    </button>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleChange(e, 'email')}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                      placeholder="your.email@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleChange(e, 'phone')}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <textarea
+                      value={formData.address}
+                      onChange={(e) => handleChange(e, 'address')}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                      placeholder="Your address"
+                      rows="2"
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-
-
-            {/* Experience Section */}
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Experience</h3>
-              {formData.experience.map((exp, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      placeholder="Job Title"
-                      value={exp.jobTitle}
-                      onChange={(e) => handleChange(e, 'experience', index, 'jobTitle')}
-                      className="border rounded-lg p-2 flex-grow"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Company"
-                      value={exp.company}
-                      onChange={(e) => handleChange(e, 'experience', index, 'company')}
-                      className="border rounded-lg p-2 flex-grow"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Duration"
-                      value={exp.duration}
-                      onChange={(e) => handleChange(e, 'experience', index, 'duration')}
-                      className="border rounded-lg p-2"
-                    />
+              {/* Profile Picture */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                  <div className="w-2 h-6 bg-[#6A38C2] rounded-full mr-3"></div>
+                  Profile Picture
+                </h3>
+                <div className="flex items-center space-x-6">
+                  <div className="flex-shrink-0">
+                    {mediaPreview ? (
+                      <img
+                        src={mediaPreview}
+                        alt="Profile Preview"
+                        className="w-24 h-24 rounded-full object-cover border-4 border-gray-100"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
+                        <ImageIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
                   </div>
-                  <textarea
-                    placeholder="Description"
-                    value={exp.description}
-                    onChange={(e) => handleChange(e, 'experience', index, 'description')}
-                    className="border rounded-lg p-2 w-full mt-2"
-                  />
-                  <div className="flex justify-between items-center mt-2">
-                    <button
-                      onClick={() => addSectionItem('experience')}
-                      className="bg-black text-white text-sm px-4 py-2 rounded"
-                    >
-                      Add Experience
-                    </button>
-                    <button
-                      onClick={() => removeSectionItem('experience', index)}
-                      className="bg-red-500 text-white text-sm px-4 py-2 rounded"
-                    >
-                      Remove
-                    </button>
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                    />
+                    <p className="text-sm text-gray-500 mt-2">Upload a professional photo (JPG, PNG)</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-
-            {/* Media Upload (Profile Image or other media) */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium mb-2">Profile Picture</label>
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="border rounded-lg p-3 w-full"
-              />
-              {mediaPreview && (
-                <img
-                  src={mediaPreview}
-                  alt="Profile Preview"
-                  className="mt-4 w-32 h-32 rounded-full object-cover"
-                />
-              )}
-            </div>
-
-            {/* Generate Summary Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="button"
-              onClick={handleGenerateExperience}
-              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2 mb-4"
-            >
-              {loadingSummary ? 'Generating...' : 'Generate Experience Details'}
-            </motion.button>
-
-            {/* Add a margin to the bottom of the Generate Experience button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="button"
-              onClick={generateResumePDF} // Trigger the PDF generation
-              className="w-full py-4 bg-teal-600 text-white text-lg font-semibold rounded-xl hover:bg-teal-500 transition-all duration-300 flex items-center justify-center gap-2 mt-2" // Add `mt-2` to create a small gap
-            >
-              <PenSquare className="w-5 h-5" />
-              {loading ? 'Saving...' : 'Create Resume'}
-            </motion.button>
-
-            {/* Display Summaries Below the Form */}
-            {summaries.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-4">Suggested Experience Details</h3>
-                <ul>
-                  {summaries.map(
-                    (
-                      { experience_level, job_title, company, duration, key_responsibilities = [], achievements = [], skills_required = [] },
-                      index
-                    ) => (
-                      <li key={index} className="mb-4">
-                        <div>
-                          <strong>{experience_level} Experience:</strong>
-                          <p><strong>Job Title:</strong> {job_title}</p>
-                          <p><strong>Company:</strong> {company}</p>
-                          <p><strong>Duration:</strong> {duration}</p>
-                          <div>
-                            <strong>Key Responsibilities:</strong>
-                            <ul>
-                              {key_responsibilities.map((resp, idx) => (
-                                <li key={idx}>{resp}</li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <strong>Achievements:</strong>
-                            <ul>
-                              {achievements.map((ach, idx) => (
-                                <li key={idx}>{ach}</li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <strong>Skills Required:</strong>
-                            <ul>
-                              {skills_required.map((skill, idx) => (
-                                <li key={idx}>{skill}</li>
-                              ))}
-                            </ul>
-                          </div>
+              {/* Education Section */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                  <div className="w-2 h-6 bg-[#6A38C2] rounded-full mr-3"></div>
+                  Education
+                </h3>
+                <div className="space-y-4">
+                  {formData.education.map((edu, index) => (
+                    <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <input
+                          type="text"
+                          placeholder="Degree"
+                          value={edu.degree}
+                          onChange={(e) => handleChange(e, 'education', index, 'degree')}
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Institution"
+                          value={edu.institution}
+                          onChange={(e) => handleChange(e, 'education', index, 'institution')}
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Year"
+                          value={edu.year}
+                          onChange={(e) => handleChange(e, 'education', index, 'year')}
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                        />
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          type="button"
+                          onClick={() => addSectionItem('education')}
+                          className="flex items-center px-4 py-2 text-sm text-[#6A38C2] hover:bg-purple-50 rounded-lg transition-colors duration-200"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Education
+                        </button>
+                        {formData.education.length > 1 && (
                           <button
-                            onClick={() =>
-                              handleSelectExperience({
-                                job_title,
-                                company,
-                                duration,
-                                description: key_responsibilities.join(', '),
-                                skills_required,
-                              })
-                            }
-                            className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-xl"
+                            type="button"
+                            onClick={() => removeSectionItem('education', index)}
+                            className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
                           >
-                            Select Experience
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove
                           </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Experience Section */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                  <div className="w-2 h-6 bg-[#6A38C2] rounded-full mr-3"></div>
+                  Experience
+                </h3>
+                <div className="space-y-4">
+                  {formData.experience.map((exp, index) => (
+                    <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <input
+                          type="text"
+                          placeholder="Job Title"
+                          value={exp.jobTitle}
+                          onChange={(e) => handleChange(e, 'experience', index, 'jobTitle')}
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Company"
+                          value={exp.company}
+                          onChange={(e) => handleChange(e, 'experience', index, 'company')}
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Duration"
+                          value={exp.duration}
+                          onChange={(e) => handleChange(e, 'experience', index, 'duration')}
+                          className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                        />
+                      </div>
+                      <textarea
+                        placeholder="Job description and responsibilities"
+                        value={exp.description}
+                        onChange={(e) => handleChange(e, 'experience', index, 'description')}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200 mb-4"
+                        rows="3"
+                      />
+                      <div className="flex justify-between">
+                        <button
+                          type="button"
+                          onClick={() => addSectionItem('experience')}
+                          className="flex items-center px-4 py-2 text-sm text-[#6A38C2] hover:bg-purple-50 rounded-lg transition-colors duration-200"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Experience
+                        </button>
+                        {formData.experience.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeSectionItem('experience', index)}
+                            className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skills Section */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                  <div className="w-2 h-6 bg-[#6A38C2] rounded-full mr-3"></div>
+                  Skills
+                </h3>
+                <div className="space-y-3">
+                  {formData.skills.map((skill, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        placeholder="Enter a skill"
+                        value={skill}
+                        onChange={(e) => handleChange(e, 'skills', index)}
+                        className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6A38C2] focus:border-transparent transition-all duration-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addSectionItem('skills')}
+                        className="p-3 text-[#6A38C2] hover:bg-purple-50 rounded-lg transition-colors duration-200"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                      {formData.skills.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeSectionItem('skills', index)}
+                          className="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={handleGenerateExperience}
+                  disabled={loadingSummary}
+                  className="w-full py-4 bg-gradient-to-r from-[#6A38C2] to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-[#6A38C2] transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>{loadingSummary ? 'Generating AI Suggestions...' : 'Generate AI Experience'}</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={generateResumePDF}
+                  disabled={loading}
+                  className="w-full py-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-teal-700 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{loading ? 'Creating Resume...' : 'Download PDF Resume'}</span>
+                </motion.button>
+              </div>
+            </form>
+
+            {/* AI Suggestions */}
+            {summaries.length > 0 && (
+              <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <Sparkles className="w-5 h-5 text-[#6A38C2] mr-2" />
+                  AI-Generated Experience Suggestions
+                </h3>
+                <div className="space-y-4">
+                  {summaries.map((suggestion, index) => (
+                    <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-gray-800">{suggestion.experience_level} Level</h4>
+                        <p className="text-sm text-gray-600">{suggestion.job_title} at {suggestion.company}</p>
+                        <p className="text-sm text-gray-500">{suggestion.duration}</p>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <strong className="text-gray-700">Key Responsibilities:</strong>
+                          <ul className="list-disc list-inside ml-4 text-gray-600">
+                            {suggestion.key_responsibilities?.map((resp, idx) => (
+                              <li key={idx}>{resp}</li>
+                            ))}
+                          </ul>
                         </div>
-                      </li>
-                    )
-                  )}
-                </ul>
+                        
+                        <div>
+                          <strong className="text-gray-700">Achievements:</strong>
+                          <ul className="list-disc list-inside ml-4 text-gray-600">
+                            {suggestion.achievements?.map((ach, idx) => (
+                              <li key={idx}>{ach}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <strong className="text-gray-700">Skills:</strong>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {suggestion.skills_required?.map((skill, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-[#6A38C2] text-white text-xs rounded-full">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleSelectExperience({
+                          job_title: suggestion.job_title,
+                          company: suggestion.company,
+                          duration: suggestion.duration,
+                          description: suggestion.key_responsibilities?.join(', '),
+                          skills_required: suggestion.skills_required,
+                        })}
+                        className="mt-4 w-full py-2 bg-[#6A38C2] text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                      >
+                        Use This Experience
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </form>
-        </div>
-
-        {/* Preview Section */}
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
-          {/* Resume Header */}
-          <div className="text-center mb-8">
-            <h3 className="text-3xl font-extrabold text-gray-800">{formData.name || 'Name'}</h3>
-            <div className="mt-2 text-lg text-gray-600">
-              <p>{formData.email || 'email@example.com'}</p>
-              <p>{formData.phone || '(555) 555-5555'}</p>
-              <p>{formData.address || '123 Main St, City, Country'}</p>
-            </div>
           </div>
 
-          {/* Experience Section */}
-          <div className="mb-6">
-            <h4 className="text-xl font-semibold text-gray-700">Experience</h4>
-            <div className="space-y-4 mt-2">
-              {formData.experience.map((exp, index) => (
-                <div key={index} className="border-b pb-4">
-                  <h5 className="text-lg font-semibold text-gray-800">
-                    {exp.jobTitle || 'Job Title'} at {exp.company || 'Company Name'}
-                  </h5>
-                  <p className="text-sm text-gray-600">{exp.duration || 'January 2020 - Present'}</p>
-                  <p className="mt-2 text-gray-700">{exp.description || 'Job description goes here.'}</p>
+          {/* Preview Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 h-fit sticky top-8">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+              <div className="w-2 h-6 bg-[#6A38C2] rounded-full mr-3"></div>
+              Resume Preview
+            </h3>
+            
+            <div className="bg-gray-50 p-6 rounded-xl">
+              {/* Header */}
+              <div className="text-center mb-6 pb-4 border-b border-gray-200">
+                {mediaPreview && (
+                  <img
+                    src={mediaPreview}
+                    alt="Profile"
+                    className="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-md"
+                  />
+                )}
+                <h2 className="text-2xl font-bold text-gray-800">{formData.name || 'Your Name'}</h2>
+                <div className="text-sm text-gray-600 space-y-1 mt-2">
+                  <p>{formData.email || 'your.email@example.com'}</p>
+                  <p>{formData.phone || '+1 (555) 123-4567'}</p>
+                  <p>{formData.address || 'Your Address'}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Education Section */}
-          <div className="mb-6">
-            <h4 className="text-xl font-semibold text-gray-700">Education</h4>
-            <div className="space-y-4 mt-2">
-              {formData.education.map((edu, index) => (
-                <div key={index} className="border-b pb-4">
-                  <h5 className="text-lg font-semibold text-gray-800">
-                    {edu.degree || 'Degree'} from {edu.institution || 'Institution Name'}
-                  </h5>
-                  <p className="text-sm text-gray-600">{edu.year || 'Graduation Year'}</p>
+              {/* Experience */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">Experience</h3>
+                <div className="space-y-3">
+                  {formData.experience.map((exp, index) => (
+                    <div key={index}>
+                      <h4 className="font-semibold text-gray-800">
+                        {exp.jobTitle || 'Job Title'} - {exp.company || 'Company Name'}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-1">{exp.duration || 'Duration'}</p>
+                      <p className="text-sm text-gray-700">{exp.description || 'Job description will appear here.'}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Education */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">Education</h3>
+                <div className="space-y-2">
+                  {formData.education.map((edu, index) => (
+                    <div key={index}>
+                      <h4 className="font-semibold text-gray-800">
+                        {edu.degree || 'Degree'} - {edu.institution || 'Institution'}
+                      </h4>
+                      <p className="text-sm text-gray-600">{edu.year || 'Year'}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-1">Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {formData.skills.map((skill, index) => (
+                    <span key={index} className="px-3 py-1 bg-[#6A38C2] text-white text-sm rounded-full">
+                      {skill || 'Skill'}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Skills Section */}
-          <div className="mb-6">
-            <h4 className="text-xl font-semibold text-gray-700">Skills</h4>
-            <div className="mt-2 flex flex-wrap gap-3">
-              {formData.skills.map((skill, index) => (
-                <span key={index} className="bg-gray-200 text-gray-800 rounded-full px-4 py-1 text-sm">
-                  {skill || 'Skill'}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Profile Picture Section */}
-          {mediaPreview && (
-            <div className="flex justify-center mt-6">
-              <img
-                src={mediaPreview}
-                alt="Profile Preview"
-                className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
-              />
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
